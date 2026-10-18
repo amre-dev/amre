@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#000000">
+<title>Amr Zeitony | @amre_dev</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;600&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  color-scheme:dark;
+  --bg:#000;--panel:#030a05;--neon:#39ff14;--soft:#c4ffd0;--dim:#5fbf72;--line:#145c1e;--cyan:#19f0ff;--red:#ff4d6d;
+  --glow:0 0 8px rgba(57,255,20,.55);
+  --mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
+  --ar:"IBM Plex Sans Arabic","Segoe UI",Tahoma,sans-serif;
+  box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+}
+html{scroll-padding-top:calc(env(safe-area-inset-top,0px) + 56px);background:var(--bg)}
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--soft);font:400 15px/1.75 var(--mono);-webkit-text-size-adjust:100%;overflow-x:hidden}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);background:#000;z-index:20}
+body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:15;
+  background:repeating-linear-gradient(0deg,rgba(0,0,0,.28) 0 1px,transparent 1px 3px),radial-gradient(ellipse at center,transparent 55%,rgba(0,0,0,.55))}
+::selection{background:var(--neon);color:#000}
+[dir=rtl] .ar,[dir=rtl] .ar *{font-family:var(--ar)}
+:focus-visible{outline:2px solid var(--cyan);outline-offset:3px}
+.n{color:var(--neon);text-shadow:var(--glow)}
+.d{color:var(--dim)}.c{color:var(--cyan)}
+
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:10;background:rgba(0,0,0,.92);border-bottom:1px solid var(--line);direction:ltr}
+.top>div{display:flex;align-items:center;justify-content:space-between;height:52px;padding:0 14px;max-width:760px;margin:0 auto}
+.brand{font-weight:700;color:var(--neon);text-shadow:var(--glow);font-size:15px}
+.stt{font-size:12px;color:var(--dim);display:flex;align-items:center;gap:6px}
+.stt i{width:8px;height:8px;border-radius:50%;background:var(--neon);box-shadow:0 0 8px var(--neon);animation:p 2s ease-in-out infinite}
+@keyframes p{50%{opacity:.35}}
+.lang{font:700 14px var(--mono);color:var(--neon);background:none;border:1px solid var(--neon);box-shadow:var(--glow);min-width:52px;height:40px;cursor:pointer;margin-inline-start:12px}
+.lang:active{background:var(--neon);color:#000}
+
+main{max-width:760px;margin:0 auto;padding:18px 14px 60px}
+.cmd{direction:ltr;text-align:left;margin:0 0 8px;word-break:break-all}
+.cmd .u{color:var(--neon);text-shadow:var(--glow)}
+.boot{direction:ltr;text-align:left;font-size:13px;color:var(--dim);min-height:5.2em}
+.boot b{color:var(--neon);font-weight:700;text-shadow:var(--glow)}
+.cur{display:inline-block;width:.6em;height:1.1em;background:var(--neon);box-shadow:var(--glow);vertical-align:-3px;animation:b 1s steps(1) infinite}
+@keyframes b{50%{opacity:0}}
+
+h1{font:700 clamp(26px,8.4vw,44px)/1.25 var(--mono);color:var(--neon);text-shadow:0 0 14px rgba(57,255,20,.6);margin:20px 0 12px;letter-spacing:-.5px}
+[dir=rtl] h1{font-family:var(--ar);letter-spacing:0;line-height:1.45}
+.lead{color:var(--soft);margin:0 0 20px}
+.btns{display:grid;gap:10px}
+.btn{font:700 15px var(--mono);display:flex;align-items:center;justify-content:center;min-height:50px;padding:0 18px;text-decoration:none;cursor:pointer;border:1px solid var(--neon);direction:ltr;text-align:center}
+.btn.p{background:var(--neon);color:#000;box-shadow:0 0 18px rgba(57,255,20,.45)}
+.btn.o{background:none;color:var(--neon);text-shadow:var(--glow)}
+.btn:active{transform:scale(.98)}
+[dir=rtl] .btn.ar{font-family:var(--ar)}
+
+.box{position:relative;border:1px solid var(--line);background:var(--panel);margin:36px 0 0;padding:20px 14px 14px}
+.box>.ttl{position:absolute;top:-11px;inset-inline-start:12px;background:var(--bg);padding:0 8px;font-size:12px;color:var(--neon);text-shadow:var(--glow);direction:ltr}
+.box p{margin:0}
+.svc{display:grid;gap:14px}
+.svc div{display:grid;grid-template-columns:auto 1fr;gap:2px 10px}
+.svc b{color:var(--neon);text-shadow:var(--glow);direction:ltr}
+.svc span{color:var(--soft);font-weight:700}
+.svc small{grid-column:2;color:var(--dim);font-size:13px;line-height:1.65}
+.tags{display:flex;flex-wrap:wrap;gap:8px;direction:ltr}
+.tags span{border:1px solid var(--line);color:var(--cyan);padding:2px 10px;font-size:13px}
+.tags span::before{content:"[ ";color:var(--dim)}.tags span::after{content:" ]";color:var(--dim)}
+.cp{margin-bottom:14px}
+.chs{display:grid;gap:10px}
+.ch{display:flex;gap:8px}
+.chl{flex:1;min-width:0;display:flex;flex-direction:column;justify-content:center;border:1px solid var(--neon);padding:10px 14px;min-height:62px;text-decoration:none;direction:ltr;text-align:left}
+.chl b{font-size:12px;color:var(--dim);font-weight:400}
+.chl span{color:var(--neon);text-shadow:var(--glow);font-weight:700;overflow-wrap:anywhere}
+.chl:active{background:rgba(57,255,20,.12)}
+.cb{font:700 13px var(--mono);color:var(--neon);background:none;border:1px solid var(--line);width:68px;cursor:pointer}
+.cb:active{background:var(--neon);color:#000}
+.hint{color:var(--dim);font-size:13px;margin-top:10px!important}
+.end{margin-top:32px}
+.toast{position:fixed;bottom:calc(18px + env(safe-area-inset-bottom,0px));left:50%;transform:translate(-50%,12px);background:var(--neon);color:#000;padding:10px 16px;font:700 14px var(--mono);opacity:0;pointer-events:none;transition:.2s;z-index:30;box-shadow:0 0 18px rgba(57,255,20,.5)}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+
+@media (min-width:640px){
+  body{font-size:16px}main{padding:32px 24px 90px}.btns{display:flex}.btn{min-width:210px}.copy{width:auto;min-width:240px}
+  .box{padding:24px 22px 20px}.svc{grid-template-columns:1fr 1fr;gap:18px 26px}
+}
+@media (prefers-reduced-motion:reduce){.cur,.stt i{animation:none}.toast{transition:none}}
+</style>
+</head>
+<body>
+<header class="top"><div>
+  <span class="brand">&gt; amre_dev</span>
+  <span style="display:flex;align-items:center">
+    <span class="stt"><i></i>online</span>
+    <button class="lang" id="lang" type="button" aria-label="Switch language">ع</button>
+  </span>
+</div></header>
+
+<main>
+  <div class="boot" id="boot" aria-hidden="true"></div>
+  <div id="page" hidden>
+    <div class="cmd"><span class="u">root@amre_dev:~#</span> cat whoami.txt</div>
+    <h1 class="ar" data-t="h1"></h1>
+    <p class="lead ar" data-t="lead"></p>
+    <div class="btns">
+      <a class="btn p ar" href="#contact" data-t="cta1"></a>
+      <a class="btn o ar" href="#services" data-t="cta2"></a>
+    </div>
+
+    <section class="box"><span class="ttl">about.md</span><p class="ar" data-t="about"></p></section>
+
+    <section class="box" id="services"><span class="ttl">./services</span>
+      <div class="svc ar">
+        <div><b>[+]</b><span data-t="s1t"></span><small data-t="s1d"></small></div>
+        <div><b>[+]</b><span data-t="s2t"></span><small data-t="s2d"></small></div>
+        <div><b>[+]</b><span data-t="s3t"></span><small data-t="s3d"></small></div>
+        <div><b>[+]</b><span data-t="s4t"></span><small data-t="s4d"></small></div>
+      </div>
+    </section>
+
+    <section class="box"><span class="ttl">stack.txt</span>
+      <div class="tags"><span>HTML/CSS</span><span>JavaScript</span><span>React</span><span>Node.js</span><span>Supabase</span><span>Android</span><span>AI/LLM-APIs</span><span>UI/UX</span></div>
+    </section>
+
+    <section class="box" id="contact"><span class="ttl">./contact.sh</span>
+      <p class="cp ar" data-t="cp"></p>
+      <div class="chs">
+        <div class="ch"><a class="chl" href="https://wa.me/963930534650" target="_blank" rel="noopener"><b>whatsapp</b><span>+963 930 534 650</span></a><button class="cb" type="button" data-copy="+963930534650" aria-label="Copy WhatsApp number">copy</button></div>
+        <div class="ch"><a class="chl" href="https://t.me/amre_dev" target="_blank" rel="noopener"><b>telegram</b><span>@amre_dev</span></a><button class="cb" type="button" data-copy="@amre_dev" aria-label="Copy Telegram username">copy</button></div>
+        <div class="ch"><a class="chl" href="mailto:amredeveloper@gmail.com"><b>email</b><span>amredeveloper@gmail.com</span></a><button class="cb" type="button" data-copy="amredeveloper@gmail.com" aria-label="Copy email address">copy</button></div>
+      </div>
+      <p class="hint ar" data-t="chint"></p>
+    </section>
+
+    <div class="cmd end"><span class="u">root@amre_dev:~#</span> <span class="cur"></span></div>
+  </div>
+</main>
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+var T={
+en:{h1:"I build web apps and products that just work.",lead:"I’m Amr Zeitony, a web and app developer working on AI and digital product design, from the first idea to the moment a user gets the product.",cta1:"Get in touch",cta2:"See what I do",about:"I work on real systems and interfaces, and I care about clean code and clear design. I use AI as a daily tool to ship faster without lowering quality.",s1t:"Web development",s1d:"Fast websites, stores and dashboards that work great on mobile.",s2t:"Mobile apps",s2d:"Android and web apps with a smooth user experience.",s3t:"Artificial intelligence",s3d:"Adding AI models to products and automating repetitive work.",s4t:"Digital product design",s4d:"Clear interfaces and a visual identity that fits the project.",cp:"Have an idea or a project? Tell me about it.",chint:"Tap a channel to open it, or copy the address.",copied:"Copied",title:"Amr Zeitony | @amre_dev",btn:"ع"},
+ar:{h1:"أبني مواقع وتطبيقات تشتغل بسلاسة.",lead:"أنا عمرو زيتوني، مطوّر ويب وتطبيقات. أشتغل على الذكاء الاصطناعي وتصميم المنتجات الرقمية، من الفكرة لحد ما يوصل المنتج للمستخدم.",cta1:"تواصل معي",cta2:"شو بقدر أعمل",about:"بشتغل على أنظمة وواجهات حقيقية، وبحب الكود النظيف والتصميم الواضح. بستخدم الذكاء الاصطناعي كأداة يومية لأسرّع التنفيذ وأحافظ على الجودة.",s1t:"تطوير الويب",s1d:"مواقع ومتاجر ولوحات تحكم سريعة وبتشتغل ممتاز على الموبايل.",s2t:"تطبيقات الموبايل",s2d:"تطبيقات أندرويد وويب بتجربة استخدام سلسة.",s3t:"الذكاء الاصطناعي",s3d:"دمج نماذج الذكاء الاصطناعي بالمنتجات وأتمتة المهام المتكررة.",s4t:"تصميم المنتجات الرقمية",s4d:"واجهات واضحة وهوية بصرية بتناسب المشروع.",cp:"عندك فكرة أو مشروع؟ احكيلي عنها.",chint:"اضغط على القناة لتفتحها، أو انسخ العنوان.",copied:"اننسخ",title:"عمرو زيتوني | @amre_dev",btn:"EN"}
+};
+var lang="en",boot=document.getElementById("boot"),page=document.getElementById("page"),timer,first=true;
+var LINES=["[ <b>OK</b> ] loading profile","[ <b>OK</b> ] mounting ./services","[ <b>OK</b> ] connection secure"];
+function apply(){
+  var d=T[lang];
+  document.documentElement.lang=lang;document.documentElement.dir=lang==="ar"?"rtl":"ltr";
+  document.title=d.title;
+  document.querySelectorAll("[data-t]").forEach(function(e){e.textContent=d[e.dataset.t]});
+  document.getElementById("lang").textContent=d.btn;
+}
+function show(){boot.innerHTML=LINES.join("<br>");page.hidden=false}
+function run(){
+  clearTimeout(timer);
+  var reduce=window.matchMedia("(prefers-reduced-motion:reduce)").matches;
+  if(!first||reduce){first=false;show();return}
+  first=false;var i=0;boot.innerHTML="";
+  (function s(){
+    if(i<LINES.length){boot.innerHTML=LINES.slice(0,i+1).join("<br>")+"<span class='cur'></span>";i++;timer=setTimeout(s,420)}
+    else timer=setTimeout(function(){show();window.scrollTo(0,0)},350)
+  })();
+}
+document.getElementById("lang").addEventListener("click",function(){lang=lang==="ar"?"en":"ar";apply();if(!page.hidden){clearTimeout(timer);show()}});
+document.querySelectorAll("[data-copy]").forEach(function(b){b.addEventListener("click",function(){
+  var t=document.getElementById("toast");
+  try{navigator.clipboard.writeText(b.dataset.copy)}catch(e){}
+  t.textContent=T[lang].copied;t.classList.add("on");setTimeout(function(){t.classList.remove("on")},1800);
+})});
+apply();run();
+</script>
+</body>
+</html>
