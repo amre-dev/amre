@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0b5d3b">
+<title>تشكيلة الرفقات</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#0b1d16;color:#f4fff7;font-family:Tahoma,Arial,sans-serif}
+main{max-width:560px;margin:auto;padding:18px 12px 32px}
+header{text-align:center;padding:12px 4px 18px}h1{font-size:27px;margin:8px 0}p{color:#b9d0c2;font-size:14px;line-height:1.7;margin:8px 0}
+.box{background:#132c21;border:1px solid #2d5741;border-radius:15px;padding:14px;margin:12px 0}
+label{display:block;font-size:14px;font-weight:bold;margin-bottom:7px}
+input[type=text]{width:100%;padding:12px;border:1px solid #426950;border-radius:10px;background:#081a12;color:white;font:inherit;font-size:14px;outline:none}
+input::placeholder{color:#91ad9c}
+.player{padding:12px 0;border-bottom:1px solid #294737}.player:last-child{border-bottom:0}
+.name{font-weight:bold;font-size:14px;margin-bottom:9px}
+.row{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:7px;align-items:center}
+.roleinput{min-width:0;padding:11px 9px!important}
+.choice{border:1px solid #426950;border-radius:9px;background:#1a3a2a;color:#eaffef;padding:10px 9px;font:inherit;font-size:12px;white-space:nowrap;cursor:pointer}
+.choice.active{background:#b8f36b;color:#102719;border-color:#b8f36b;font-weight:bold}
+.choice.out.active{background:#ff8585;border-color:#ff8585}
+button.action{width:100%;border:0;border-radius:11px;padding:14px;margin-top:9px;font:inherit;font-weight:bold;cursor:pointer}
+#send{background:#b8f36b;color:#102719}#copy{background:#254a36;color:#fff;border:1px solid #426950}
+#status{font-size:13px;color:#c9f89e;min-height:18px;margin-top:10px;line-height:1.7}
+.hint{font-size:12px;color:#a9c5b3;line-height:1.8}
+@media(max-width:390px){.row{grid-template-columns:minmax(0,1fr) auto auto;gap:5px}.choice{padding:10px 7px;font-size:11px}.roleinput{font-size:12px!important}}
+</style>
+</head>
+<body>
+<main>
+<header>
+<div style="color:#b8f36b;font-size:12px">تصويت مباراة الخماسي</div>
+<h1>اختار تشكيلتك ⚽</h1>
+<p>اكتب مركز اللاعب بنفسك، أو اضغط احتياط أو خارج التشكيلة.</p>
+</header>
+<section class="box">
+<label for="voter">اسمك</label>
+<input type="text" id="voter" maxlength="50" placeholder="اكتب اسمك هون">
+</section>
+<section class="box">
+<div id="players"></div>
+<p class="hint">إذا ضغطت احتياط أو خارج التشكيلة رح تنحط تلقائياً بالخانة. وإذا كتبت مركز بإيدك بيتحدد المركز المكتوب.</p>
+</section>
+<section class="box">
+<button class="action" id="send">إرسال التشكيلة عبر واتساب</button>
+<button class="action" id="copy">نسخ التشكيلة</button>
+<div id="status" aria-live="polite"></div>
+</section>
+</main>
+<script>
+const names=["محمد دبك","محمد علي نحاس","محمد بلال","عمر بطيخ","عمر كعود","عمرو زيتوني","سعد البابي","عبد الكريم خيزران","يزن مردود"];
+const host=document.getElementById("players");
+names.forEach((name,i)=>{
+ const row=document.createElement("div");row.className="player";
+ const label=document.createElement("div");label.className="name";label.textContent=name;
+ const controls=document.createElement("div");controls.className="row";
+ const input=document.createElement("input");input.type="text";input.id="role"+i;input.className="roleinput";input.maxLength=40;input.placeholder="اكتب المركز...";input.autocomplete="off";
+ const bench=document.createElement("button");bench.type="button";bench.className="choice";bench.textContent="احتياط";bench.setAttribute("aria-pressed","false");
+ const out=document.createElement("button");out.type="button";out.className="choice out";out.textContent="خارج التشكيلة";out.setAttribute("aria-pressed","false");
+ function selectButton(which){
+   input.value=which;
+   [bench,out].forEach(b=>{const active=b.textContent===which;b.classList.toggle("active",active);b.setAttribute("aria-pressed",String(active))});
+   updateButtonState();
+ }
+ bench.addEventListener("click",()=>selectButton(bench.classList.contains("active")?"":"احتياط"));
+ out.addEventListener("click",()=>selectButton(out.classList.contains("active")?"":"خارج التشكيلة"));
+ input.addEventListener("input",()=>{
+   [bench,out].forEach(b=>{b.classList.remove("active");b.setAttribute("aria-pressed","false")});
+   if(input.value.trim()==="احتياط")bench.classList.add("active");
+   if(input.value.trim()==="خارج التشكيلة")out.classList.add("active");
+   updateButtonState();
+ });
+ controls.append(input,bench,out);row.append(label,controls);host.appendChild(row);
+});
+function getMessage(){
+ let out="⚽ تصويت تشكيلة الخماسي\nاسم المصوّت: "+(document.getElementById("voter").value.trim()||"لم يكتب اسمه")+"\n\n";
+ names.forEach((name,i)=>{out+=name+": "+(document.getElementById("role"+i).value.trim()||"لم يحدد")+"\n"});
+ return out;
+}
+function updateButtonState(){document.getElementById("status").textContent=""}
+function validate(){
+ const missing=names.filter((_,i)=>!document.getElementById("role"+i).value.trim());
+ if(missing.length){document.getElementById("status").textContent="باقي تحدد مركز أو حالة كل لاعب: "+missing.join("، ");return false}
+ return true;
+}
+document.getElementById("send").addEventListener("click",()=>{
+ if(!validate())return;
+ window.open("https://wa.me/963958653504?text="+encodeURIComponent(getMessage()),"_blank");
+ document.getElementById("status").textContent="واتساب فتح والرسالة جاهزة. اختار المحادثة وابعتها.";
+});
+document.getElementById("copy").addEventListener("click",async()=>{
+ if(!validate())return;
+ const status=document.getElementById("status");
+ try{await navigator.clipboard.writeText(getMessage());status.textContent="تم نسخ التصويت. فيك تلصقه بواتساب."}
+ catch(e){const t=document.createElement("textarea");t.value=getMessage();document.body.appendChild(t);t.select();document.execCommand("copy");t.remove();status.textContent="تم نسخ التصويت. فيك تلصقه بواتساب."}
+});
+</script>
+</body>
+</html>
