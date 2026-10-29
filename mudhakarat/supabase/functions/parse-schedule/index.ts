@@ -90,7 +90,7 @@ Deno.serve(async (req: Request) => {
     // 4) Call Google AI. The key comes from Supabase Secrets only.
     const apiKey = Deno.env.get("GEMINI_API_KEY");
     if (!apiKey) return json({ error: "ai_not_configured" }, 500);
-    const model = Deno.env.get("GEMINI_MODEL") || "gemini-2.5-flash";
+    const model = Deno.env.get("GEMINI_MODEL") || "gemini-2.5-flash-lite";
 
     const aiRes = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`,
