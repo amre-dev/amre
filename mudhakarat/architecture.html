@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#080e1d">
+  <meta name="color-scheme" content="dark">
+  <title>البنية المعمارية - مذاكراتي</title>
+  <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+  <style>
+    :root{--bg:#080e1d;--panel:#0f1a38;--panel2:#14224a;--line:#223463;--text:#e8edf8;--muted:#94a5c9;--gold:#d8b45a;--gold2:#f0cf7a;--done:#52d19b;--wait:#f2994a;--up:#7da0ee;--bad:#f27070;
+      --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;--sans:system-ui,-apple-system,"Segoe UI",Tahoma,"Noto Sans Arabic",sans-serif}
+    *{box-sizing:border-box}
+    html{background:var(--bg)}
+    body{margin:0;background:radial-gradient(1000px 420px at 85% -10%,rgba(216,180,90,.07),transparent 60%),var(--bg);color:var(--text);font:16px/1.75 var(--sans)}
+    main{max-width:860px;margin:0 auto;padding:20px 16px 64px}
+    a{color:var(--gold2)}
+    h1{font-size:1.6rem;margin:.2em 0 .1em;color:var(--gold2)}
+    h2{font-size:1.2rem;margin:2em 0 .5em;color:var(--gold);border-bottom:1px solid var(--line);padding-bottom:.3em}
+    h3{font-size:1rem;margin:1.2em 0 .3em}
+    p,li{color:var(--text)}
+    .sub{color:var(--muted);margin:0 0 1em}
+    .back{display:inline-block;margin-bottom:8px;color:var(--muted);text-decoration:none}
+    .back:hover{color:var(--gold2)}
+    .card{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:14px 16px;margin:12px 0}
+    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}
+    code,.mono{font-family:var(--mono);direction:ltr;unicode-bidi:isolate;background:var(--panel2);border:1px solid var(--line);border-radius:4px;padding:1px 6px;font-size:.88em}
+    pre{direction:ltr;text-align:left;background:#060b17;border:1px solid var(--line);border-radius:8px;padding:12px;overflow-x:auto;font:13px/1.6 var(--mono);color:#cfd8ee}
+    table{width:100%;border-collapse:collapse;font-size:.92rem}
+    th,td{border:1px solid var(--line);padding:6px 10px;text-align:right;vertical-align:top}
+    th{background:var(--panel2);color:var(--gold2)}
+    .tag{display:inline-block;font-size:.78rem;padding:0 8px;border-radius:99px;border:1px solid var(--line);color:var(--muted)}
+    .ok{color:var(--done)} .no{color:var(--bad)} .warn{color:var(--wait)}
+    .diagram{overflow-x:auto}
+    .diagram svg{width:100%;min-width:640px;height:auto;display:block}
+    svg text{font-family:var(--sans)}
+    ul{padding-inline-start:1.3em}
+    .note{border-inline-start:3px solid var(--gold);background:rgba(216,180,90,.08);padding:8px 12px;border-radius:4px;margin:12px 0}
+  </style>
+</head>
+<body>
+<main>
+  <a class="back" href="./">← العودة إلى التطبيق</a>
+  <h1>البنية المعمارية</h1>
+  <p class="sub">كيف يعمل «مذاكراتي» ولماذا بُني بهذا الشكل: تطبيق خفيف بلا خادم دائم، يعمل دون إنترنت، ويزامن بياناتك سحابياً بأمان.</p>
+
+  <h2>١. الصورة العامة</h2>
+  <div class="card diagram">
+    <svg viewBox="0 0 800 420" role="img" aria-label="مخطط البنية: المتصفح، Supabase، الذكاء الاصطناعي">
+      <defs>
+        <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#d8b45a"/></marker>
+      </defs>
+      <rect x="10" y="10" width="400" height="400" rx="10" fill="#0b1330" stroke="#223463"/>
+      <text x="210" y="36" fill="#d8b45a" font-size="15" text-anchor="middle" font-weight="700">جهازك (PWA)</text>
+      <rect x="30" y="52" width="360" height="62" rx="8" fill="#14224a" stroke="#31478a"/>
+      <text x="210" y="78" fill="#e8edf8" font-size="14" text-anchor="middle">الواجهة: HTML + CSS + JavaScript</text>
+      <text x="210" y="100" fill="#94a5c9" font-size="12" text-anchor="middle">تقويم · لوحة · إدخال علامات</text>
+      <rect x="30" y="128" width="360" height="62" rx="8" fill="#14224a" stroke="#31478a"/>
+      <text x="210" y="154" fill="#e8edf8" font-size="14" text-anchor="middle">الحسابات (calc.js) — محلية فقط</text>
+      <text x="210" y="176" fill="#94a5c9" font-size="12" text-anchor="middle">المعدل الحقيقي · المتوقع · المطلوب للهدف</text>
+      <rect x="30" y="204" width="360" height="62" rx="8" fill="#14224a" stroke="#31478a"/>
+      <text x="210" y="230" fill="#e8edf8" font-size="14" text-anchor="middle">التخزين المحلي + طابور المزامنة</text>
+      <text x="210" y="252" fill="#94a5c9" font-size="12" text-anchor="middle">يعمل دون إنترنت ويحفظ كل تعديل فوراً</text>
+      <rect x="30" y="280" width="360" height="52" rx="8" fill="#14224a" stroke="#31478a"/>
+      <text x="210" y="311" fill="#e8edf8" font-size="14" text-anchor="middle">Service Worker — ملفات التطبيق دون إنترنت</text>
+      <text x="210" y="368" fill="#94a5c9" font-size="12" text-anchor="middle">لا مفاتيح سرية هنا — المفتاح العام فقط</text>
+      <text x="210" y="388" fill="#94a5c9" font-size="12" text-anchor="middle">والحماية الحقيقية في قاعدة البيانات</text>
+
+      <rect x="470" y="10" width="320" height="250" rx="10" fill="#0b1330" stroke="#223463"/>
+      <text x="630" y="36" fill="#d8b45a" font-size="15" text-anchor="middle" font-weight="700">Supabase</text>
+      <rect x="490" y="52" width="280" height="46" rx="8" fill="#14224a" stroke="#31478a"/>
+      <text x="630" y="80" fill="#e8edf8" font-size="14" text-anchor="middle">Auth — تسجيل الدخول والجلسات</text>
+      <rect x="490" y="108" width="280" height="62" rx="8" fill="#14224a" stroke="#31478a"/>
+      <text x="630" y="134" fill="#e8edf8" font-size="14" text-anchor="middle">PostgreSQL + RLS</text>
+      <text x="630" y="156" fill="#94a5c9" font-size="12" text-anchor="middle">كل صف مرتبط بصاحبه ومعزول</text>
+      <rect x="490" y="180" width="280" height="62" rx="8" fill="#14224a" stroke="#d8b45a"/>
+      <text x="630" y="206" fill="#e8edf8" font-size="14" text-anchor="middle">Edge Function: parse-schedule</text>
+      <text x="630" y="228" fill="#94a5c9" font-size="12" text-anchor="middle">تتحقق من الهوية و ai_enabled</text>
+
+      <rect x="470" y="300" width="320" height="110" rx="10" fill="#0b1330" stroke="#223463"/>
+      <text x="630" y="328" fill="#d8b45a" font-size="15" text-anchor="middle" font-weight="700">Google AI (Gemini)</text>
+      <text x="630" y="356" fill="#e8edf8" font-size="13" text-anchor="middle">قراءة صورة/PDF البرنامج فقط</text>
+      <text x="630" y="380" fill="#94a5c9" font-size="12" text-anchor="middle">المفتاح في Supabase Secrets</text>
+
+      <line x1="410" y1="83" x2="468" y2="75" stroke="#d8b45a" stroke-width="1.6" marker-end="url(#ar)"/>
+      <line x1="410" y1="235" x2="468" y2="140" stroke="#d8b45a" stroke-width="1.6" marker-end="url(#ar)" marker-start="url(#ar)"/>
+      <line x1="410" y1="300" x2="468" y2="215" stroke="#d8b45a" stroke-width="1.6" stroke-dasharray="5 4" marker-end="url(#ar)"/>
+      <line x1="630" y1="242" x2="630" y2="298" stroke="#d8b45a" stroke-width="1.6" marker-end="url(#ar)" marker-start="url(#ar)"/>
+    </svg>
+  </div>
+
+  <h2>٢. مبادئ التصميم</h2>
+  <div class="grid">
+    <div class="card"><h3>بلا خادم دائم</h3><p>كل شيء يعمل من ملفات ثابتة تُستضاف في أي مكان، والخلفية خدمة Supabase المُدارة.</p></div>
+    <div class="card"><h3>الأولوية للجهاز</h3><p>التطبيق يقرأ ويكتب في نسخة محلية أولاً، ثم يزامنها. لذلك هو سريع ويعمل دون اتصال.</p></div>
+    <div class="card"><h3>الأمان في القاعدة</h3><p>إخفاء الأزرار ليس حماية. سياسات RLS هي ما يمنع أي مستخدم من رؤية بيانات غيره.</p></div>
+    <div class="card"><h3>الحسابات محلية</h3><p>كل المعدلات والأهداف تُحسب بـ JavaScript على جهازك. الذكاء الاصطناعي لا يرى علاماتك أبداً.</p></div>
+  </div>
+
+  <h2>٣. قاعدة البيانات</h2>
+  <div class="card">
+    <table>
+      <tr><th>الجدول</th><th>المحتوى</th><th>المفتاح</th></tr>
+      <tr><td><code>profiles</code></td><td>الاسم، وعلم <code>ai_enabled</code> (للقراءة فقط من التطبيق)</td><td>معرّف المستخدم</td></tr>
+      <tr><td><code>user_settings</code></td><td>مقياس العرض والهدف الافتراضي</td><td>معرّف المستخدم</td></tr>
+      <tr><td><code>subjects</code></td><td>المواد والعلامة الكاملة الافتراضية</td><td>معرّف فريد</td></tr>
+      <tr><td><code>months</code></td><td>الأشهر وهدف كل شهر</td><td>المستخدم + الشهر</td></tr>
+      <tr><td><code>exams</code></td><td>المذاكرات: التاريخ، المادة، العلامة الكاملة، المتوقعة، الفعلية، الحالة</td><td>معرّف فريد</td></tr>
+    </table>
+    <p>كل جدول يحمل <code>user_id</code> وتاريخ تعديل <code>updated_at</code>، والحذف «ناعم» (<code>deleted</code>) كي يصل الحذف إلى بقية أجهزتك.</p>
+  </div>
+  <div class="card">
+    <h3>سياسات RLS</h3>
+    <ul>
+      <li>القراءة والإضافة والتعديل والحذف مسموحة فقط حين <code>auth.uid() = user_id</code>.</li>
+      <li>جدول <code>profiles</code>: يستطيع المستخدم قراءة صفه وتعديل <code>display_name</code> فقط. صلاحية تعديل <code>ai_enabled</code> غير ممنوحة لأي مستخدم، فلا يمكن تفعيل الميزة بتعديل طلب الشبكة.</li>
+      <li>مشغّل <code>handle_new_user</code> ينشئ الملف والإعدادات عند التسجيل.</li>
+      <li>مشغّل <code>sync_guard</code> يثبّت <code>user_id</code> ويرفض الكتابة الأقدم من النسخة الموجودة.</li>
+      <li>قيود في القاعدة: العلامة لا تكون سالبة ولا أكبر من العلامة الكاملة.</li>
+    </ul>
+  </div>
+
+  <h2>٤. المزامنة وحل التعارض</h2>
+  <div class="card">
+    <ol>
+      <li>أي تعديل يُكتب فوراً في التخزين المحلي، فتتحدث الأرقام دون انتظار الشبكة.</li>
+      <li>يُضاف التعديل إلى طابور. عند وجود اتصال يُرسل الطابور إلى Supabase بالترتيب.</li>
+      <li>تظهر الحالة في الأعلى: <span class="ok">محفوظ سحابياً</span> · <span class="warn">بانتظار المزامنة</span> · <span class="no">فشل الحفظ</span>.</li>
+      <li>التعارض بين جهازين: <b>الأحدث يفوز لكل سجل</b> حسب <code>updated_at</code>. إن وصلت كتابة أقدم من الموجودة على الخادم، يتجاهلها المشغّل ولا تمسح شيئاً أحدث.</li>
+      <li>الطابور يبقى في الجهاز عند إغلاق التطبيق، فلا يضيع شيء.</li>
+    </ol>
+    <div class="note">التعديلان على سجلين مختلفين لا يتعارضان أبداً. التعارض يحدث فقط حين يُعدَّل السجل نفسه من جهازين في الفترة نفسها، وعندها يُحفظ آخر تعديل.</div>
+  </div>
+
+  <h2>٥. الذكاء الاصطناعي والمفتاح السري</h2>
+  <div class="card">
+    <pre>المتصفح ──(JWT المستخدم + الملف)──▶ Edge Function: parse-schedule
+                                          │ 1) يتحقق من الهوية
+                                          │ 2) يقرأ profiles.ai_enabled
+                                          │ 3) يقرأ المفتاح من Secrets
+                                          ▼
+                                       Google AI
+                                          │
+المتصفح ◀──(مواعيد ومواد وعناوين فقط)──────┘</pre>
+    <ul>
+      <li><b>النموذج المعتمد:</b> مفتاح واحد على مستوى المشروع، يضبطه المسؤول في Supabase Secrets باسم <code>GEMINI_API_KEY</code>. لا يصل المتصفح، ولا يُخزَّن في جدول أو <code>localStorage</code>.</li>
+      <li><b>من يستطيع الاستخدام:</b> الحسابات التي <code>ai_enabled = true</code> فقط. تُفعَّل من لوحة Supabase، وليس من التطبيق.</li>
+      <li><b>ماذا يُرسل:</b> ملف البرنامج فقط. لا علامات ولا أهداف ولا أي حساب.</li>
+      <li><b>ماذا يعود:</b> التاريخ واليوم والمادة والعنوان والملاحظات، وتُعرض للمراجعة قبل أي حفظ.</li>
+      <li><b>يحتاج إنترنت:</b> نعم. أما بقية التطبيق فيعمل دونه.</li>
+      <li><b>لبقية الطلاب:</b> يستوردون ملف البرنامج (<code>.json</code>) الذي تصدّره أنت. لا يحتاجون الذكاء الاصطناعي.</li>
+    </ul>
+  </div>
+
+  <h2>٦. مشاركة البرنامج مع الزملاء</h2>
+  <div class="card">
+    <p>من «استيراد» تصدّر ملف برنامج يحتوي على: التواريخ والمواد والعناوين والعلامات الكاملة. <b>لا يحتوي علاماتك المتوقعة أو الفعلية ولا هدفك.</b> الزميل يستورده فيرى معاينة قابلة للتعديل، ثم يعتمدها. المذاكرات المكررة تُكتشف وتُتجاوز.</p>
+  </div>
+
+  <h2>٧. العمل دون إنترنت</h2>
+  <table class="card" style="display:table">
+    <tr><th>الميزة</th><th>دون إنترنت</th></tr>
+    <tr><td>فتح التطبيق والتقويم</td><td class="ok">يعمل</td></tr>
+    <tr><td>إدخال العلامات والحسابات</td><td class="ok">يعمل</td></tr>
+    <tr><td>مزامنة التعديلات</td><td class="warn">تنتظر عودة الاتصال</td></tr>
+    <tr><td>تسجيل الدخول لأول مرة / من جهاز جديد</td><td class="no">يحتاج إنترنت</td></tr>
+    <tr><td>قراءة برنامج بالذكاء الاصطناعي</td><td class="no">يحتاج إنترنت</td></tr>
+  </table>
+
+  <h2>٨. هيكل الملفات</h2>
+  <pre>index.html · architecture.html · manifest.webmanifest · sw.js
+css/app.css
+js/config.js   إعدادات الاتصال (مفتاح عام فقط)
+js/supa.js     عميل Supabase خفيف: Auth + REST + Functions
+js/store.js    الحالة المحلية والتخزين
+js/sync.js     طابور المزامنة وحل التعارض
+js/calc.js     كل الحسابات (مختبَرة)
+js/backup.js   النسخ الاحتياطي وملف البرنامج المشترك
+js/app.js      الشاشات والتفاعل
+supabase/      مخطط القاعدة والدالة الخلفية
+tests/         اختبارات الحسابات</pre>
+</main>
+</body>
+</html>
