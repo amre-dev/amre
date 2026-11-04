@@ -76,6 +76,7 @@ h1{font:700 clamp(30px,8vw,52px)/1.35 var(--ar);color:var(--neon);text-shadow:0 
 .shots{display:grid;gap:16px}
 .shots figure{margin:0}
 .shots img{display:block;width:100%;height:auto;border:1px solid var(--line);box-shadow:0 0 24px rgba(57,255,20,.12);background:#050505}
+.shots img.s{width:auto;max-width:100%;margin-inline:auto}
 .shots figcaption{margin-top:8px;color:var(--dim);font-size:14px}
 
 .faq details{border-top:1px solid var(--line);padding:12px 0}
@@ -127,7 +128,7 @@ h1{font:700 clamp(30px,8vw,52px)/1.35 var(--ar);color:var(--neon);text-shadow:0 
   <section class="box shots" id="shots" hidden><span class="ttl">./screenshots</span>
     <figure><img src="shots/main.png" alt="الواجهة الرئيسية للبرنامج"><figcaption>الواجهة الرئيسية: الصق الروابط واختر الصيغة والجودة</figcaption></figure>
     <figure><img src="shots/downloading.png" alt="تنزيل عدة أغاني مع معاينة الغلاف"><figcaption>كل أغنية بصفها: غلاف، شريط تقدم، وسرعة التنزيل</figcaption></figure>
-    <figure><img src="shots/cover.png" alt="الملف الصوتي بعد التنزيل مع الغلاف"><figcaption>النتيجة: الغلاف ظاهر داخل الملف الصوتي</figcaption></figure>
+    <figure><img class="s" src="shots/cover.png" alt="الملف الصوتي بعد التنزيل مع الغلاف"><figcaption>النتيجة: الغلاف ظاهر داخل الملف الصوتي</figcaption></figure>
   </section>
 
   <section class="box" id="features"><span class="ttl">features.md</span>
