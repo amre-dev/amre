@@ -1,9 +1,9 @@
 // Service Worker: يخزّن ملفات التطبيق ليعمل دون إنترنت. لا يعترض أي طلب إلى Supabase (طلبات أخرى المصدر).
-const CACHE = 'mz-v2-1.1.0';
+const CACHE = 'mz-v2-1.1.1';
 const ASSETS = [
   './', 'index.html', 'architecture.html', 'manifest.webmanifest', 'css/app.css',
   'js/app.js', 'js/config.js', 'js/util.js', 'js/calc.js', 'js/store.js', 'js/sync.js', 'js/supa.js', 'js/backup.js', 'js/icons.js',
-  'bg-dawn.jpg', 'bg-daybreak.jpg', 'icons/icon.svg', 'icons/icon-192.png', 'icons/icon-512.png', 'icons/icon-maskable-512.png', 'icons/apple-touch-icon.png',
+  'bg-dawn.jpg', 'bg-daybreak.jpg', 'bg-desktop.jpg', 'bg-desktop-light.jpg', 'icons/icon.svg', 'icons/icon-192.png', 'icons/icon-512.png', 'icons/icon-maskable-512.png', 'icons/apple-touch-icon.png',
 ];
 const INDEX = new URL('index.html', self.registration.scope).href;
 

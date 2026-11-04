@@ -350,3 +350,9 @@ html[data-theme="light"] .btn.primary { color:#ffffff; }
 html[data-theme="light"] input, html[data-theme="light"] select, html[data-theme="light"] textarea { background:#ffffff; color:var(--text); }
 html[data-theme="light"] .progress { background:#e3f0de; }
 html[data-theme="light"] .hero { background: linear-gradient(160deg, rgba(255,255,255,.92), rgba(222,243,214,.85)); border-color: rgba(47,107,42,.35); color: var(--text); }
+
+/* خلفيات الشاشات العريضة (الحاسوب): صور بنسبة 16:9 بدل صور الهاتف */
+@media (min-aspect-ratio: 1/1) and (min-width: 700px) {
+  body { background-image: url("../bg-desktop.jpg"), radial-gradient(900px 480px at 88% -8%, rgba(168, 228, 156, .16), transparent 62%), linear-gradient(180deg, #101a10 0%, #070b07 60%, #0b120b 100%); background-position: center, center, center; background-size: cover, auto, auto; background-repeat: no-repeat; }
+  html[data-theme="light"] body { background-image: url("../bg-desktop-light.jpg"); background-position: center bottom; background-size: cover; background-color: #f3fbf0; }
+}
