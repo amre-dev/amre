@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#000000">
+<title>تنزيل الأغاني | أداة تنزيل الأغاني مع الغلاف</title>
+<meta name="description" content="برنامج مجاني لويندوز: الصق رابط أغنية أو قائمة تشغيل كاملة، وانزّلها mp3 مع غلاف الأغنية مضمّن داخل الملف.">
+<meta property="og:title" content="تنزيل الأغاني">
+<meta property="og:description" content="انزّل أغانيك مع الغلاف مضمّن داخل الملف: mp3 و m4a و flac، وقوائم تشغيل كاملة بضغطة وحدة.">
+<meta property="og:type" content="website">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  color-scheme:dark;
+  --bg:#000;--panel:#030a05;--neon:#39ff14;--soft:#c4ffd0;--dim:#5fbf72;--line:#145c1e;--cyan:#19f0ff;--red:#ff4d6d;
+  --glow:0 0 8px rgba(57,255,20,.55);
+  --mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
+  --ar:"IBM Plex Sans Arabic","Segoe UI",Tahoma,sans-serif;
+}
+html{scroll-padding-top:68px;background:var(--bg)}
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--soft);font:400 16px/1.8 var(--ar);-webkit-text-size-adjust:100%;overflow-x:hidden;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:15;
+  background:repeating-linear-gradient(0deg,rgba(0,0,0,.22) 0 1px,transparent 1px 3px),radial-gradient(ellipse at center,transparent 60%,rgba(0,0,0,.5))}
+::selection{background:var(--neon);color:#000}
+:focus-visible{outline:2px solid var(--cyan);outline-offset:3px}
+a{color:var(--cyan)}
+[hidden]{display:none!important}
+code,.mono{font-family:var(--mono);direction:ltr;unicode-bidi:embed}
+
+.top{position:sticky;top:0;z-index:10;background:rgba(0,0,0,.92);border-bottom:1px solid var(--line)}
+.top>div{display:flex;align-items:center;justify-content:space-between;height:52px;padding:0 14px;max-width:860px;margin:0 auto}
+.brand{font:700 15px var(--mono);color:var(--neon);text-shadow:var(--glow);text-decoration:none;direction:ltr}
+.nav{display:flex;gap:16px;font-size:14px}
+.nav a{color:var(--dim);text-decoration:none}
+.nav a:hover{color:var(--neon)}
+
+main{max-width:860px;margin:0 auto;padding:22px 14px 70px}
+.cmd{font:400 14px var(--mono);direction:ltr;text-align:left;margin:0 0 8px;color:var(--dim)}
+.cmd .u{color:var(--neon);text-shadow:var(--glow)}
+h1{font:700 clamp(30px,8vw,52px)/1.35 var(--ar);color:var(--neon);text-shadow:0 0 14px rgba(57,255,20,.6);margin:18px 0 12px}
+.lead{font-size:18px;margin:0 0 22px;max-width:640px}
+.btns{display:grid;gap:10px}
+.btn{font:700 16px var(--ar);display:flex;align-items:center;justify-content:center;gap:8px;min-height:54px;padding:0 22px;text-decoration:none;cursor:pointer;border:1px solid var(--neon)}
+.btn.p{background:var(--neon);color:#000;box-shadow:0 0 18px rgba(57,255,20,.45)}
+.btn.o{background:none;color:var(--neon);text-shadow:var(--glow)}
+.btn:active{transform:scale(.98)}
+.meta{display:flex;flex-wrap:wrap;gap:8px 18px;margin:14px 0 0;color:var(--dim);font-size:13px}
+.meta span::before{content:"› ";color:var(--neon)}
+
+.box{position:relative;border:1px solid var(--line);background:var(--panel);margin:40px 0 0;padding:22px 16px 16px}
+.box>.ttl{position:absolute;top:-12px;inset-inline-start:12px;background:var(--bg);padding:0 8px;font:400 12px var(--mono);color:var(--neon);text-shadow:var(--glow);direction:ltr}
+.box p{margin:0 0 10px}.box p:last-child{margin-bottom:0}
+
+.feat{display:grid;gap:16px}
+.feat div{display:grid;grid-template-columns:auto minmax(0,1fr);gap:2px 10px}
+.feat b{color:var(--neon);text-shadow:var(--glow);font-family:var(--mono)}
+.feat span{color:var(--soft);font-weight:700}
+.feat small{grid-column:2;color:var(--dim);font-size:14px;line-height:1.7}
+
+.steps{display:grid;gap:12px;margin:0;padding:0;list-style:none;counter-reset:s}
+.steps li{counter-increment:s;display:grid;grid-template-columns:auto minmax(0,1fr);gap:4px 12px}
+.steps li::before{content:counter(s);width:28px;height:28px;display:grid;place-items:center;border:1px solid var(--neon);color:var(--neon);font:700 14px var(--mono);box-shadow:var(--glow)}
+.steps small{grid-column:2;color:var(--dim);font-size:14px}
+.code{grid-column:2;min-width:0;display:flex;gap:8px;align-items:stretch;direction:ltr;margin-top:4px}
+.code code{flex:1;min-width:0;overflow-x:auto;white-space:normal;word-break:break-all;background:#000;border:1px solid var(--line);color:var(--neon);padding:9px 12px;font-size:13px;line-height:1.5}
+.cb{font:700 12px var(--mono);color:var(--neon);background:none;border:1px solid var(--line);width:64px;cursor:pointer}
+.cb:active{background:var(--neon);color:#000}
+
+.cover-flow{display:grid;gap:10px;margin:6px 0 14px}
+.cover-flow div{border:1px dashed var(--line);padding:10px 12px;font:400 14px/1.7 var(--ar);color:var(--soft);display:flex;gap:10px;align-items:center}
+.cover-flow em{font-style:normal;color:var(--cyan)}
+
+.shots{display:grid;gap:16px}
+.shots figure{margin:0}
+.shots img{display:block;width:100%;height:auto;border:1px solid var(--line);box-shadow:0 0 24px rgba(57,255,20,.12);background:#050505}
+.shots figcaption{margin-top:8px;color:var(--dim);font-size:14px}
+
+.faq details{border-top:1px solid var(--line);padding:12px 0}
+.faq details:first-child{border-top:0;padding-top:0}
+.faq summary{cursor:pointer;color:var(--neon);font-weight:700}
+.faq p{margin:8px 0 0;color:var(--soft);font-size:15px}
+
+.foot{margin-top:46px;text-align:center;color:var(--dim);font-size:14px}
+.foot .cur{display:inline-block;width:.6em;height:1.1em;background:var(--neon);box-shadow:var(--glow);vertical-align:-3px;animation:b 1s steps(1) infinite}
+@keyframes b{50%{opacity:0}}
+.toast{position:fixed;bottom:calc(18px + env(safe-area-inset-bottom,0px));left:50%;transform:translate(-50%,12px);background:var(--neon);color:#000;padding:10px 16px;font:700 14px var(--ar);opacity:0;pointer-events:none;transition:.2s;z-index:30;box-shadow:0 0 18px rgba(57,255,20,.5)}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+
+@media (min-width:700px){
+  body{font-size:17px}main{padding:36px 24px 90px}
+  .btns{display:flex}.btn{min-width:230px}
+  .feat{grid-template-columns:1fr 1fr;gap:20px 30px}
+  .box{padding:26px 24px 20px}
+  .cover-flow{grid-template-columns:repeat(4,1fr)}
+  .cover-flow div{flex-direction:column;align-items:flex-start}
+}
+@media (prefers-reduced-motion:reduce){.foot .cur{animation:none}}
+</style>
+</head>
+<body>
+
+<header class="top"><div>
+  <a class="brand" href="https://amre.is-a.dev/">amre_dev</a>
+  <nav class="nav" aria-label="التنقل">
+    <a href="#features">المزايا</a>
+    <a href="#cover">الغلاف</a>
+    <a href="#install">التشغيل</a>
+    <a href="#faq">أسئلة</a>
+  </nav>
+</div></header>
+
+<main>
+  <div class="cmd"><span class="u">root@amre_dev:~#</span> ./songs_downloader_pro.pyw</div>
+  <h1>انزّل أغانيك مع الغلاف.<br>بضغطة وحدة.</h1>
+  <p class="lead">الصق رابط أغنية أو قائمة تشغيل كاملة، والبرنامج بينزّلها بصيغة mp3 (أو m4a / flac / mp4) ومعها غلاف الأغنية مضمّن داخل الملف نفسه، فبيظهر بالمشغّل وبالموبايل وبكل مكان.</p>
+  <div class="btns">
+    <a class="btn p" href="songs_downloader_pro.pyw" download>⬇ تنزيل البرنامج</a>
+    <a class="btn o" href="#install">كيف أشغّله؟</a>
+  </div>
+  <div class="meta">
+    <span>مجاني</span><span>لويندوز</span><span>ملف بايثون واحد</span><span>بدون إعلانات</span>
+  </div>
+
+  <section class="box shots" id="shots" hidden><span class="ttl">./screenshots</span>
+    <figure><img src="shots/main.png" alt="الواجهة الرئيسية للبرنامج"><figcaption>الواجهة الرئيسية: الصق الروابط واختر الصيغة والجودة</figcaption></figure>
+    <figure><img src="shots/downloading.png" alt="تنزيل عدة أغاني مع معاينة الغلاف"><figcaption>كل أغنية بصفها: غلاف، شريط تقدم، وسرعة التنزيل</figcaption></figure>
+    <figure><img src="shots/cover.png" alt="الملف الصوتي بعد التنزيل مع الغلاف"><figcaption>النتيجة: الغلاف ظاهر داخل الملف الصوتي</figcaption></figure>
+  </section>
+
+  <section class="box" id="features"><span class="ttl">features.md</span>
+    <div class="feat">
+      <div><b>[+]</b><span>غلاف داخل الملف</span><small>الصورة المصغّرة بتنحط جوّا ملف الصوت نفسه، مش ملف جانبي.</small></div>
+      <div><b>[+]</b><span>قوائم تشغيل كاملة</span><small>القائمة بتتفكك لأغاني مستقلة، لكل وحدة غلافها وتقدمها، وبتنحفظ بمجلد باسم القائمة.</small></div>
+      <div><b>[+]</b><span>تنزيلات متزامنة</span><small>من 1 إلى 8 أغاني بنفس الوقت، والباقي بينتظر دوره.</small></div>
+      <div><b>[+]</b><span>صيغ وجودات</span><small>mp3 و m4a و flac وفيديو mp4، وجودة من 128 إلى 320.</small></div>
+      <div><b>[+]</b><span>إلغاء وإعادة محاولة</span><small>أوقف أي تنزيل أو كلهم، وأعد المحاولة للفاشل بزر.</small></div>
+      <div><b>[+]</b><span>تخطي المكرر</span><small>سجل بالأغاني المنزّلة سابقاً عشان ما تنزّل نفس الأغنية مرتين.</small></div>
+      <div><b>[+]</b><span>مراقبة الحافظة</span><small>اختياري: انسخ رابط يوتيوب أو ساوندكلاود وبيبدأ التنزيل لحاله.</small></div>
+      <div><b>[+]</b><span>وضع داكن وفاتح</span><small>وكل إعداداتك بتنحفظ: المجلد، الصيغة، الجودة.</small></div>
+    </div>
+  </section>
+
+  <section class="box" id="cover"><span class="ttl">cover-art.sh</span>
+    <p>أغلب الأدوات بتنزّل الصوت وبتنسى الغلاف، أو بتحطه كما هو بصيغة ما بتفهمها المشغّلات. هون الغلاف بيمر بأربع خطوات:</p>
+    <div class="cover-flow">
+      <div>1 <em>جلب</em> أفضل صورة متاحة للأغنية</div>
+      <div>2 <em>تحويل</em> من webp إلى jpg المتوافق مع الجميع</div>
+      <div>3 <em>قص</em> مربع من المنتصف مثل ألبومات الموسيقى</div>
+      <div>4 <em>تضمين</em> داخل الملف مع اسم الأغنية والفنان</div>
+    </div>
+    <p>تقدر تطفي القص المربع أو تضمين الغلاف من الإعدادات.</p>
+  </section>
+
+  <section class="box" id="install"><span class="ttl">install.sh</span>
+    <ol class="steps">
+      <li>
+        <span>ثبّت بايثون</span>
+        <small>من python.org، وفعّل خيار Add Python to PATH أثناء التثبيت.</small>
+      </li>
+      <li>
+        <span>ثبّت المكتبات</span>
+        <small>افتح PowerShell ونفّذ:</small>
+        <div class="code"><code>pip install -U yt-dlp customtkinter pillow mutagen</code><button class="cb" type="button" data-copy="pip install -U yt-dlp customtkinter pillow mutagen">copy</button></div>
+      </li>
+      <li>
+        <span>ثبّت ffmpeg</span>
+        <small>ضروري لتحويل الصوت وتضمين الغلاف:</small>
+        <div class="code"><code>winget install ffmpeg</code><button class="cb" type="button" data-copy="winget install ffmpeg">copy</button></div>
+      </li>
+      <li>
+        <span>شغّل البرنامج</span>
+        <small>نزّل الملف من الأعلى وانقر عليه مرتين. إذا ما اشتغل بعد تثبيت ffmpeg، أغلقه وافتحه من جديد.</small>
+      </li>
+    </ol>
+  </section>
+
+  <section class="box faq" id="faq"><span class="ttl">faq.txt</span>
+    <details><summary>شو أوفر مكان أحفظ فيه الأغاني؟</summary><p>افتراضياً مجلد «الأغاني» على سطح المكتب، وتقدر تغيّره من زر «تغيير» وبينحفظ.</p></details>
+    <details><summary>التنزيل وقف أو فشل، شو أعمل؟</summary><p>أول شي اضغط «تحديث yt-dlp» من البرنامج، لأن المواقع بتغيّر طريقتها وبتنكسر النسخ القديمة. إذا استمرت المشكلة اضغط على الصف الفاشل لتشوف رسالة الخطأ كاملة، وابعتها لي.</p></details>
+    <details><summary>الغلاف ما ظهر بصيغة flac؟</summary><p>تضمين الغلاف بـ flac يحتاج مكتبة mutagen: <code>pip install mutagen</code>.</p></details>
+    <details><summary>بيشتغل على ماك أو لينكس؟</summary><p>مصمم لويندوز. الكود بايثون عادي وقد يشتغل على غيره، بس ما جرّبته.</p></details>
+    <details><summary>هل في قيود قانونية؟</summary><p>البرنامج واجهة لأداة yt-dlp المفتوحة المصدر. استخدمه فقط لتنزيل محتوى عندك حق تنزيله، وانت المسؤول عن استخدامك له.</p></details>
+  </section>
+
+  <div class="foot">
+    <p>صنع بواسطة <a href="https://amre.is-a.dev/">amre_dev</a> · للتواصل: <a href="https://t.me/amre_dev" target="_blank" rel="noopener">@amre_dev</a></p>
+    <p class="mono"><span style="color:var(--neon)">root@amre_dev:~#</span> <span class="cur"></span></p>
+  </div>
+</main>
+
+<div class="toast" id="toast" role="status" aria-live="polite">تم النسخ</div>
+
+<script>
+(function(){
+  // نسخ الأوامر
+  var toast=document.getElementById('toast'),tt;
+  function show(m){toast.textContent=m;toast.classList.add('on');clearTimeout(tt);tt=setTimeout(function(){toast.classList.remove('on')},1400)}
+  document.querySelectorAll('[data-copy]').forEach(function(b){
+    b.addEventListener('click',function(){
+      var v=b.getAttribute('data-copy');
+      function fb(){var t=document.createElement('textarea');t.value=v;t.style.position='fixed';t.style.opacity='0';document.body.appendChild(t);t.select();try{document.execCommand('copy');show('تم النسخ')}catch(e){show('انسخ يدوياً')}t.remove()}
+      if(navigator.clipboard&&window.isSecureContext){navigator.clipboard.writeText(v).then(function(){show('تم النسخ')},fb)}else{fb()}
+    });
+  });
+
+  // معرض الصور: يظهر فقط لما تكون اللقطات موجودة بمجلد shots/
+  var sec=document.getElementById('shots'),figs=sec.querySelectorAll('figure'),left=figs.length;
+  function check(){if(left>0){sec.hidden=false}}
+  figs.forEach(function(f){
+    var img=f.querySelector('img');
+    function bad(){f.remove();left--;if(left<=0)sec.hidden=true}
+    img.addEventListener('error',bad);
+    img.addEventListener('load',check);
+    if(img.complete){img.naturalWidth?check():bad()}
+  });
+})();
+</script>
+</body>
+</html>
