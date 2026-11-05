@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>مذاكراتي — حمّل التطبيق</title>
+<meta name="description" content="مذاكراتي: تطبيق لتنظيم مذاكراتك ومتابعة علاماتك وأهدافك، مع تنبيهات وويدجات على شاشة هاتفك.">
+<meta name="theme-color" content="#070b07">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--navy:#070b07;--navy2:#0b120b;--slate:#3f5a3c;--line:#243424;--sand:#a8e49c;--cream:#cdeac4;--text:#eef7ea;--muted:#98aa94}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;font-family:Tajawal,system-ui,sans-serif;color:var(--text);line-height:1.7;background:var(--navy);
+ background-image:radial-gradient(900px 500px at 85% -10%,rgba(168,228,156,.16),transparent 60%),radial-gradient(800px 600px at 0% 40%,rgba(63,90,60,.30),transparent 60%),linear-gradient(180deg,#101a10 0%,#070b07 55%,#0b120b 100%);background-attachment:fixed}
+body::before{content:"";position:fixed;inset:0;z-index:-1;background:url(bg-dawn.jpg) center bottom/cover no-repeat;opacity:.55}
+@media(min-aspect-ratio:1/1) and (min-width:700px){body::before{background-image:url(bg-desktop.jpg);opacity:.9}}
+a{color:var(--sand)}
+.wrap{max-width:980px;margin:0 auto;padding:0 20px}
+header{display:flex;align-items:center;justify-content:space-between;padding:20px 0}
+.brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:22px;color:var(--cream);text-decoration:none}
+.brand img{width:38px;height:38px;border-radius:10px}
+header a.web{font-size:15px;color:var(--muted);text-decoration:none}
+header a.web:hover{color:var(--cream)}
+.hero{display:grid;grid-template-columns:1.15fr .85fr;gap:32px;align-items:center;padding:36px 0 56px}
+.hero h1{font-size:clamp(40px,7vw,66px);line-height:1.1;margin:0 0 8px;color:var(--cream);font-weight:800}
+.tag{color:var(--sand);font-size:22px;font-weight:500;margin:0 0 18px}
+.lead{color:var(--muted);font-size:18px;margin:0 0 26px;max-width:34em}
+.cta{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+.btn{display:inline-flex;align-items:center;gap:10px;background:var(--sand);color:#0a140a;font:inherit;font-weight:800;font-size:19px;padding:14px 26px;border-radius:14px;text-decoration:none;border:0;cursor:pointer;box-shadow:0 8px 30px rgba(168,228,156,.28);transition:transform .15s,box-shadow .15s}
+.btn:hover{transform:translateY(-2px);box-shadow:0 12px 36px rgba(168,228,156,.4)}
+.btn svg{width:22px;height:22px}
+.btn[aria-disabled=true]{opacity:.55;pointer-events:none;box-shadow:none}
+.meta{color:var(--muted);font-size:15px}
+.art{position:relative;aspect-ratio:1;max-width:340px;margin-inline:auto;width:100%;border-radius:0;overflow:visible;border:0;background:none;box-shadow:none}.art img{border-radius:22.5%;border:1px solid var(--line);box-shadow:0 30px 80px rgba(0,0,0,.55)}
+.art svg{position:absolute;inset:0;width:100%;height:100%}
+section{padding:30px 0}
+h2{font-size:30px;margin:0 0 6px;color:var(--cream)}
+.sub{color:var(--muted);margin:0 0 22px}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}@media(max-width:760px){.grid{grid-template-columns:1fr}}
+.card{background:rgba(13,26,46,.72);border:1px solid var(--line);border-radius:18px;padding:20px}
+.card h3{margin:0 0 6px;font-size:19px;color:var(--cream)}
+.card p{margin:0;color:var(--muted);font-size:16px}
+.ic{width:42px;height:42px;border-radius:12px;background:rgba(168,228,156,.14);display:grid;place-items:center;margin-bottom:12px;color:var(--sand)}
+.ic svg{width:22px;height:22px}
+ol.steps{list-style:none;margin:0;padding:0;display:grid;gap:12px;counter-reset:s}
+ol.steps li{counter-increment:s;display:flex;gap:16px;align-items:flex-start;background:rgba(13,26,46,.72);border:1px solid var(--line);border-radius:16px;padding:16px 18px}
+ol.steps li::before{content:counter(s);flex:none;width:34px;height:34px;border-radius:50%;background:var(--sand);color:#0a140a;font-weight:800;display:grid;place-items:center}
+ol.steps b{color:var(--cream)}
+.note{background:rgba(168,228,156,.10);border:1px solid rgba(168,228,156,.35);border-radius:18px;padding:18px 20px;color:var(--text)}
+.note b{color:var(--cream)}
+details{background:rgba(13,26,46,.72);border:1px solid var(--line);border-radius:14px;padding:12px 18px;margin-top:10px}
+summary{cursor:pointer;font-weight:700;color:var(--cream)}
+details p{color:var(--muted);margin:8px 0 0}
+footer{padding:36px 0 50px;color:var(--muted);font-size:14px;text-align:center;border-top:1px solid var(--line);margin-top:26px}
+.waves{position:fixed;inset:auto 0 0 0;height:22vh;pointer-events:none;z-index:-1;opacity:.55}
+@media(max-width:760px){.hero{grid-template-columns:1fr;text-align:right}.art{max-width:240px;order:-1}}
+</style>
+</head>
+<body>
+
+
+<div class="wrap">
+<header>
+  <a class="brand" href="#"><img src="icon.svg" alt="" width="38" height="38">مذاكراتي</a>
+  <a class="web" href="https://amre.is-a.dev/mudhakarat">فتح نسخة الويب ←</a>
+</header>
+
+<div class="hero">
+  <div>
+    <h1>مذاكراتي</h1>
+    <p class="tag">خطوة نحو مستقبلك</p>
+    <p class="lead">رتّب مذاكراتك على تقويم واحد، وتابع علاماتك المتوقعة والفعلية، واعرف كم تحتاج لتحقق هدفك. مع تنبيهات قبل كل مذاكرة وويدجات على شاشة هاتفك.</p>
+    <div class="cta">
+      <a class="btn" id="dl" href="https://mudhakarati-app.netlify.app/mudhakarat.apk" download="mudhakarat.apk" aria-disabled="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0l-5-5m5 5l5-5M4 20h16"/></svg>
+        <span id="dlt">تنزيل للأندرويد</span>
+      </a>
+      <span class="meta" id="meta">للأندرويد 7 فأحدث</span>
+    </div>
+  </div>
+  <div class="art" aria-hidden="true"><img src="icon.svg" alt="" style="width:100%;height:100%;object-fit:cover;display:block"></div>
+</div>
+
+<section>
+  <h2>ماذا يقدّم لك</h2>
+  <p class="sub">كل ما تحتاجه لتنظيم موسم المذاكرات في مكان واحد.</p>
+  <div class="grid">
+    <div class="card"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M8 3v4M16 3v4M3 10h18"/></svg></div><h3>تقويم المذاكرات</h3><p>شبكة الشهر وقائمة بكل مذاكرة وحالتها: قادمة أو بانتظار النتيجة أو مكتملة.</p></div>
+    <div class="card"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19V5M4 19h16M8 15l4-4 3 3 5-6"/></svg></div><h3>علامات وأهداف</h3><p>المعدل الحقيقي والمتوقع، وهدف كل شهر، وكم تحتاج في المتبقي لتحققه.</p></div>
+    <div class="card"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 01-3.4 0"/></svg></div><h3>تنبيهات ذكية</h3><p>أربعة تنبيهات لكل مذاكرة: مراجعة، وليلة قبلها، وصباحها، وبعد انتهائها.</p></div>
+    <div class="card"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="8" height="8" rx="2"/><rect x="13" y="3" width="8" height="8" rx="2"/><rect x="3" y="13" width="8" height="8" rx="2"/><rect x="13" y="13" width="8" height="8" rx="2"/></svg></div><h3>ويدجات للشاشة</h3><p>أقرب مذاكرة وقائمة القادمة ومعدلك، بنظرة واحدة دون فتح التطبيق.</p></div>
+    <div class="card"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0l-4-4m4 4l4-4M5 21h14"/></svg></div><h3>استيراد البرنامج</h3><p>من صورة أو PDF أو ملف من زميل، وتراجع النتائج قبل أن يُضاف أي شيء.</p></div>
+    <div class="card"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div><h3>بياناتك لك</h3><p>تُحفظ في حسابك وتتزامن بين هاتفك والويب، ولا يراها غيرك.</p></div>
+  </div>
+</section>
+
+<section id="install">
+  <h2>طريقة التثبيت</h2>
+  <p class="sub">التطبيق يُثبَّت من الملف مباشرة، فيطلب هاتفك إذنًا لمرة واحدة.</p>
+  <ol class="steps">
+    <li><div><b>نزّل الملف</b> بزر «تنزيل للأندرويد» أعلاه، وافتحه من إشعار التنزيل أو من تطبيق الملفات.</div></li>
+    <li><div><b>اسمح بالتثبيت</b> إن سألك الهاتف عن مصدر غير معروف: اختر «السماح من هذا المصدر» للمتصفح الذي نزّلت منه.</div></li>
+    <li><div><b>اضغط «تثبيت»</b> ثم افتح التطبيق وسجّل الدخول أو أنشئ حسابًا. وعند السؤال، اسمح بالتنبيهات.</div></li>
+  </ol>
+  <div class="note" style="margin-top:16px"><b>التحديث:</b> نزّل النسخة الجديدة من هنا وثبّتها فوق القديمة. لا حاجة لحذف التطبيق، وتبقى بياناتك كما هي.</div>
+  <details>
+    <summary>ظهرت رسالة «تطبيق ضار» أو تحذير من Play Protect؟</summary>
+    <p>هذا تحذير عام يظهر لأي تطبيق يُنزَّل من خارج متجر Google Play ومن مطوّر لا تعرفه Google بعد. التطبيق لا يطلب أذونات خطرة؛ يستخدم التنبيهات فقط. اختر «مزيد من التفاصيل» ثم «التثبيت على أي حال».</p>
+  </details>
+  <details>
+    <summary>لا أجد خيار السماح بالتثبيت</summary>
+    <p>افتح الإعدادات ← التطبيقات ← الوصول الخاص ← تثبيت التطبيقات غير المعروفة، ثم فعّل الخيار للمتصفح أو لتطبيق الملفات. تختلف التسمية قليلًا بين الشركات.</p>
+  </details>
+</section>
+
+<footer>مذاكراتي · خطوة نحو مستقبلك<br><span id="ver"></span></footer>
+</div>
+
+<script>
+(function(){
+  var NETLIFY='https://mudhakarati-app.netlify.app/';
+  var btn=document.getElementById('dl'),txt=document.getElementById('dlt'),meta=document.getElementById('meta'),ver=document.getElementById('ver');
+  function load(u){return fetch(u,{cache:'no-store'}).then(function(r){if(!r.ok)throw 0;return r.json()})}
+  // الأصل: version.json على Netlify. لو المتصفح منعه (CORS) نستخدم النسخة المحلية.
+  load(NETLIFY+'version.json').catch(function(){return load('version.json')}).then(function(v){
+    btn.removeAttribute('aria-disabled');
+    btn.href=new URL(v.file||'mudhakarat.apk',NETLIFY).href;   // الـ APK دائماً من Netlify
+    var parts=['الإصدار '+v.version];
+    if(v.size)parts.push(v.size);
+    if(v.date)parts.push('آخر تحديث '+v.date);
+    meta.textContent=parts.join(' · ');
+    ver.textContent='الإصدار '+v.version+' (build '+v.build+')';
+  }).catch(function(){
+    txt.textContent='قريبًا';
+    meta.textContent='ملف التطبيق قيد الرفع، عُد بعد قليل.';
+  });
+})();
+</script>
+</body>
+</html>
