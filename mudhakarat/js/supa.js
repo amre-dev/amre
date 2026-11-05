@@ -221,6 +221,11 @@ export function arMessage(e) {
   if (c === 'validation_failed' || c === 'email_address_invalid') return 'تحقق من صحة البريد الإلكتروني';
   if (c === 'same_password') return 'كلمة السر الجديدة مطابقة للقديمة';
   if (c === 'ai_not_enabled') return 'تحليل البرامج بالذكاء الاصطناعي غير مفعّل لحسابك';
+  if (c === 'ai_model_not_found') return 'النموذج المختار غير موجود أو غير متاح لمفتاحك';
+  if (c === 'ai_key_invalid') return 'مفتاح Google AI غير صالح أو غير مضبوط على الخادم';
+  if (c === 'ai_overloaded') return 'خدمة Google AI مشغولة حالياً';
+  if (c === 'ai_bad_request') return 'رفض النموذج الطلب أو الملف';
+  if (c === 'timeout') return 'استغرق التحليل وقتاً أطول من المسموح';
   if (c === 'ai_not_configured') return 'خدمة الذكاء الاصطناعي لم تُضبط بعد على الخادم';
   if (c === 'ai_rate_limited') return 'تم بلوغ حد الاستخدام المجاني للذكاء الاصطناعي. حاول بعد قليل';
   if (c === 'ai_provider_error' || c === 'ai_bad_output') return 'تعذّر على الذكاء الاصطناعي قراءة الملف. جرّب صورة أوضح';

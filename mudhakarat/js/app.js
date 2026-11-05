@@ -24,8 +24,10 @@ const ui = {
   month: /^\d{4}-\d{2}$/.test(lsGet('mz:ui:month') || '') ? lsGet('mz:ui:month') : currentMonthKey(),
   selDay: null,
   review: null,
-  importBusy: false,
+  imp: { state: 'idle', id: 0 },
   authTab: 'login',
+  sub: null,
+  advOpen: false,
 };
 let currentUser = null;
 let recovering = false;
@@ -88,7 +90,7 @@ function showAuth(note = '') {
   const signup = ui.authTab === 'signup';
   appEl.innerHTML = `
   <div class="authwrap"><div class="card authcard">
-    <div class="brand">&gt;_ <b>مذاكراتي</b></div>
+    <div class="brand"><img class="logo" src="icons/icon.svg" alt="" width="28" height="28"><b>مذاكراتي</b></div>
     <h1 style="margin-top:10px">${signup ? 'إنشاء حساب' : 'تسجيل الدخول'}</h1>
     <p class="note" style="margin:4px 0 0">${signup ? 'احفظ علاماتك سحابياً وافتحها من أي جهاز.' : 'ادخل إلى حسابك لمتابعة مذاكراتك.'}</p>
     <div class="tabsw" role="tablist">
@@ -111,7 +113,7 @@ function showAuth(note = '') {
 function showRecovery() {
   appEl.innerHTML = `
   <div class="authwrap"><div class="card authcard">
-    <div class="brand">&gt;_ <b>مذاكراتي</b></div>
+    <div class="brand"><img class="logo" src="icons/icon.svg" alt="" width="28" height="28"><b>مذاكراتي</b></div>
     <h1 style="margin-top:10px">كلمة سر جديدة</h1>
     <form data-form="recovery" novalidate style="margin-top:14px">
       <div class="field"><label for="r-pass">كلمة السر الجديدة (8 أحرف على الأقل)</label><input id="r-pass" type="password" dir="ltr" autocomplete="new-password" required></div>
@@ -191,7 +193,7 @@ function enterApp(user) {
   appEl.innerHTML = `
   <div class="shell">
     <header class="topbar">
-      <div class="brand">&gt;_ <b>مذاكراتي</b></div>
+      <div class="brand"><img class="logo" src="icons/icon.svg" alt="" width="28" height="28"><b>مذاكراتي</b></div>
       <nav class="tabs" aria-label="التنقل الرئيسي">
         ${[['home', 'الرئيسية'], ['calendar', 'التقويم'], ['import', 'استيراد'], ['settings', 'الإعدادات']]
           .map(([r, l]) => `<button data-act="go" data-r="${r}">${ICONS[r]}<span>${l}</span></button>`).join('')}
@@ -220,8 +222,10 @@ function leaveApp() {
 }
 
 function routeFromHash() {
-  const m = /^#\/(\w+)/.exec(location.hash);
-  return m && ROUTES.includes(m[1]) ? m[1] : 'home';
+  const m = /^#\/(\w+)(?:\/(\w+))?/.exec(location.hash);
+  const r = m && ROUTES.includes(m[1]) ? m[1] : 'home';
+  ui.sub = r === 'settings' && m && m[2] ? m[2] : null;
+  return r;
 }
 window.addEventListener('hashchange', () => {
   if (!currentUser) return;
@@ -230,7 +234,7 @@ window.addEventListener('hashchange', () => {
   window.scrollTo(0, 0);
 });
 function go(route) {
-  if (location.hash === `#/${route}`) { ui.route = route; render(true); window.scrollTo(0, 0); } else location.hash = `#/${route}`;
+  if (location.hash === `#/${route}`) { ui.route = routeFromHash(); render(true); window.scrollTo(0, 0); } else location.hash = `#/${route}`;
 }
 
 const CHIP = {
@@ -276,6 +280,7 @@ function render(force = false) {
   });
   if (!force) window.scrollTo(0, y);
 }
+document.addEventListener('toggle', (e) => { if (e.target && e.target.matches && e.target.matches('details[data-adv]')) ui.advOpen = e.target.open; }, true);
 document.addEventListener('focusout', () => setTimeout(() => { if (pendingRender && !document.querySelector('dialog[open]')) render(false); }, 50));
 dlg.addEventListener('close', () => { if (pendingRender) render(false); });
 
@@ -298,54 +303,43 @@ function examRow(e) {
   else marks = `<span class="m num">${fmt(e.full_mark)}</span><span class="hint">العلامة الكاملة</span>`;
   return `<button class="exam s-${st}" data-act="edit" data-id="${e.id}">
     <span class="date"><b class="num">${d}</b>${DAYS_SHORT[dow]}</span>
-    <span class="name">${esc(e.subject_name)}</span>
+    <span class="name">${subjAvatar(e.subject_name)}<span>${esc(e.subject_name)}</span></span>
     <span class="marks">${marks}${badge(st)}</span>
     ${e.title ? `<span class="ttl">${esc(e.title)}</span>` : ''}
   </button>`;
 }
 
-function avgCard(kind, label, pct, emptyText, scale) {
-  if (pct == null) {
-    return `<section class="card stat ${kind}"><div class="k">${label}</div><div class="v none">لا يوجد بعد</div><div class="sub">${emptyText}</div></section>`;
-  }
-  return `<section class="card stat ${kind}"><div class="k">${label}</div>
-    <div class="v num">${fmt(scaled(pct, scale))}<small>من ${fmt(scale)}</small></div>
-    <div class="pct num">${fmt(pct)}%</div></section>`;
+const SJ_HUES = [38, 160, 210, 270, 330, 12, 190, 90];
+function subjHue(name) { let h = 0; for (const ch of String(name)) h = (h * 31 + ch.codePointAt(0)) >>> 0; return SJ_HUES[h % SJ_HUES.length]; }
+function subjAvatar(name) { return `<i class="sj" style="--h:${subjHue(name)}" aria-hidden="true">${esc([...String(name).trim().replace(/^ال(?=.)/, '')][0] || '؟')}</i>`; }
+function daysUntil(ds) {
+  const [y, m, d] = ds.split('-').map(Number);
+  const [ty, tm, td] = todayStr().split('-').map(Number);
+  return Math.round((Date.UTC(y, m - 1, d) - Date.UTC(ty, tm - 1, td)) / 86400000);
+}
+function daysText(n) {
+  if (n <= 0) return 'اليوم';
+  if (n === 1) return 'غداً';
+  if (n === 2) return 'بعد يومين';
+  return n <= 10 ? `بعد ${n} أيام` : `بعد ${n} يوماً`;
 }
 
-function goalBlock(plan, key, scale) {
-  const custom = store.hasCustomGoal(key);
-  const goal = store.monthGoal(key);
-  let need = '';
-  const sc = (p) => `${fmt(scaled(p, scale))} من ${fmt(scale)}`;
+function statCol(kind, label, pct, emptyText, scale) {
+  if (pct == null) return `<div class="st ${kind}"><div class="k">${label}</div><div class="v none">—</div><div class="sub">${emptyText}</div></div>`;
+  return `<div class="st ${kind}"><div class="k">${label}</div>
+    <div class="v num">${fmt(scaled(pct, scale))}<small>${scale === 100 ? '%' : `/${fmt(scale)}`}</small></div>${scale === 100 ? '' : `<div class="sub num">${fmt(pct)}%</div>`}</div>`;
+}
+
+// الهدف للعرض فقط. تعديله من الإعدادات ← العرض والهدف.
+function goalLine(plan, key) {
+  const g = `<b class="num">${fmt(store.monthGoal(key))}%</b>`;
   switch (plan.state) {
-    case 'empty':
-      need = '<div class="need"><p>أضف مذاكرات لهذا الشهر لتظهر العلامات المطلوبة لتحقيق هدفك.</p></div>';
-      break;
-    case 'achieved':
-      need = `<div class="need ok"><div class="big">✓ تحقق الهدف</div><p>علاماتك المؤكدة <span class="num">${fmt(plan.confirmed)}</span> من <span class="num">${fmt(plan.totalFull)}</span> (<span class="num">${fmt(plan.currentPct)}%</span> من مجموع الشهر) تكفي لهدف <span class="num">${fmt(goal)}%</span>${plan.openCount ? '، حتى لو لم تحصل على شيء في المتبقي.' : '.'}</p></div>`;
-      break;
-    case 'missed':
-      need = `<div class="need bad"><div class="big">انتهت مذاكرات الشهر</div><p>لم يتحقق الهدف: نتيجتك النهائية <span class="num">${fmt(plan.finalPct)}%</span> والهدف <span class="num">${fmt(goal)}%</span>.</p></div>`;
-      break;
-    case 'impossible':
-      need = `<div class="need bad"><div class="big">الهدف غير قابل للتحقيق حسابياً</div>
-        <p>أعلى نسبة ممكنة هذا الشهر <span class="num">${fmt(plan.maxPossiblePct)}%</span> (<span class="num">${sc(plan.maxPossiblePct)}</span>) حتى مع العلامة الكاملة في كل المتبقي.</p></div>`;
-      break;
-    default:
-      need = `<div class="need"><div class="k note">المطلوب في المذاكرات التي لم تُحسم نتائجها (${plan.openCount})</div>
-        <div class="big num">${fmt(plan.requiredPct)}%</div>
-        <p>أي <span class="num">${fmt(plan.requiredMarks)}</span> علامة من أصل <span class="num">${fmt(plan.openFull)}</span> · ما يعادل <span class="num">${sc(plan.requiredPct)}</span> على مقياسك.</p>
-        <p>العلامات المؤكدة حتى الآن: <span class="num">${fmt(plan.confirmed)}</span> من <span class="num">${fmt(plan.totalFull)}</span>. التوقعات لا تُحتسب هنا.</p></div>`;
+    case 'empty': return '';
+    case 'achieved': return `<div class="goalline ok">✓ تحقق الهدف ${g}</div>`;
+    case 'missed': return `<div class="goalline bad">لم يتحقق الهدف ${g} · نتيجتك <b class="num">${fmt(plan.finalPct)}%</b></div>`;
+    case 'impossible': return `<div class="goalline bad">الهدف ${g} غير قابل للتحقيق · الأعلى الممكن <b class="num">${fmt(plan.maxPossiblePct)}%</b></div>`;
+    default: return `<div class="goalline">الهدف ${g}<span class="sep" aria-hidden="true"></span>المطلوب في المتبقي <b class="num">${fmt(plan.requiredPct)}%</b></div>`;
   }
-  return `<section class="card">
-    <form class="goalbox" data-form="goal" novalidate>
-      <div><label for="goalIn">هدف ${monthLabel(key)}</label>
-        <div class="row"><input id="goalIn" class="w-sm" type="text" inputmode="decimal" value="${fmt(goal)}" aria-describedby="goalErr"><span class="num">%</span>
-        <button class="btn small">حفظ</button>
-        ${custom ? `<button type="button" class="link" data-act="resetgoal">استعادة الافتراضي (${fmt(store.settings().default_goal)}%)</button>` : ''}</div>
-        <div class="err" id="goalErr"></div></div>
-    </form>${need}</section>`;
 }
 
 function quickBlock(exams) {
@@ -375,19 +369,38 @@ function viewHome() {
   const scale = store.settings().display_scale;
   const plan = goalPlan(exams, store.monthGoal(key));
   const today = todayStr();
-  const upcoming = exams.filter((e) => e.exam_date > today && deriveStatus(e) === 'upcoming').slice(0, 6);
+  const nextExam = store.exams()
+    .filter((e) => e.exam_date >= today && deriveStatus(e) === 'upcoming')
+    .sort((a, b) => a.exam_date.localeCompare(b.exam_date) || a.subject_name.localeCompare(b.subject_name, 'ar'))[0];
+  const upcoming = exams.filter((e) => e.exam_date > today && deriveStatus(e) === 'upcoming' && e.id !== nextExam?.id);
   const pDone = S.count ? (S.completed / S.count) * 100 : 0;
   const pWait = S.count ? (S.awaiting / S.count) * 100 : 0;
+  const name = (store.profile().display_name || auth.user?.user_metadata?.display_name || '').trim();
 
-  return `${monthbar(key)}
-  <div class="grid2">
-    ${avgCard('true', 'المعدل الحقيقي (النتائج الصادرة)', S.truePct, 'لم تصدر أي علامة بعد', scale)}
-    ${avgCard('expected', 'المعدل المتوقع (ما قدّمته)', S.expectedPct, 'لم تقدّم أي مذاكرة بعد', scale)}
-  </div>
-  <div style="height:12px"></div>
-  ${goalBlock(plan, key, scale)}
-  <section class="card" style="margin-top:12px">
-    <div class="row" style="justify-content:space-between;margin-bottom:8px"><span class="note">التقدم في برنامج المذاكرات</span><span class="num">${S.taken} / ${S.count}</span></div>
+  let hero;
+  if (nextExam) {
+    const n = daysUntil(nextExam.exam_date);
+    hero = `<button class="hero" data-act="edit" data-id="${nextExam.id}">
+      <span class="k">أقرب مذاكرة</span>
+      <span class="hrow">${subjAvatar(nextExam.subject_name)}<span class="hname">${esc(nextExam.subject_name)}</span></span>
+      ${nextExam.title ? `<span class="htitle">${esc(nextExam.title)}</span>` : ''}
+      <span class="hcount${n <= 1 ? ' soon' : ''}">${daysText(n)}</span>
+      <span class="hdate">${dateLabel(nextExam.exam_date)}</span></button>`;
+  } else {
+    hero = `<section class="hero static"><span class="k">أقرب مذاكرة</span><span class="hname">لا توجد مذاكرات قادمة</span>
+      <span class="row" style="margin-top:10px"><button class="btn primary small" data-act="go" data-r="import">${ICONS.import}استيراد برنامج</button><button class="btn small" data-act="add">${ICONS.plus}إضافة يدوية</button></span></section>`;
+  }
+
+  const body = exams.length ? `
+  <section class="card stats">
+    <div class="statgrid">
+      ${statCol('true', 'المعدل الحقيقي', S.truePct, 'لم تصدر نتيجة بعد', scale)}
+      ${statCol('expected', 'المعدل المتوقع', S.expectedPct, 'لم تقدّم توقعاً بعد', scale)}
+    </div>
+    ${goalLine(plan, key)}
+  </section>
+  <section class="card slim">
+    <div class="row" style="justify-content:space-between"><span class="note">تقدّمك في البرنامج</span><span class="num note">${S.taken} / ${S.count}</span></div>
     <div class="progress" role="progressbar" aria-valuemin="0" aria-valuemax="${S.count}" aria-valuenow="${S.taken}" aria-label="المذاكرات المقدّمة">
       <i class="p-done" style="width:${pDone}%"></i><i class="p-wait" style="width:${pWait}%"></i></div>
     <div class="legend">
@@ -397,9 +410,13 @@ function viewHome() {
     </div>
   </section>
   ${quickBlock(exams)}
-  ${upcoming.length ? `<div class="sec-title">المذاكرات القادمة</div>${upcoming.map(examRow).join('')}` : ''}
-  ${!exams.length ? `<div class="empty-state" style="margin-top:14px">لا توجد مذاكرات في ${monthLabel(key)}.
-    <div class="row" style="justify-content:center;margin-top:12px"><button class="btn primary" data-act="go" data-r="import">${ICONS.import}استيراد برنامج</button><button class="btn" data-act="add">${ICONS.plus}إضافة يدوية</button></div></div>` : ''}`;
+  ${upcoming.length ? `<div class="sec-title"><span>المذاكرات القادمة</span><button class="link" data-act="go" data-r="calendar">عرض الكل</button></div>${upcoming.slice(0, 3).map(examRow).join('')}` : ''}`
+    : (nextExam ? `<div class="empty-state">لا توجد مذاكرات في ${monthLabel(key)}.</div>` : '');
+
+  return `<div class="greet"><h2>مرحباً${name ? `، ${esc(name)}` : ''}</h2></div>
+  ${hero}
+  ${monthbar(key)}
+  ${body}`;
 }
 
 function viewCalendar() {
@@ -440,91 +457,137 @@ function viewCalendar() {
 function viewImport() {
   if (ui.review) return reviewView();
   const ai = store.profile().ai_enabled;
-  return `<h2 style="margin-bottom:12px">استيراد برنامج المذاكرات</h2>
+  const advOpen = ui.advOpen || ui.imp.state === 'error';
+  return `<h2 class="ptitle">استيراد البرنامج</h2>
   <section class="card">
-    <p style="margin-top:0">ارفع ${ai ? 'صورة أو PDF لبرنامج المذاكرات ليقرأه الذكاء الاصطناعي، أو ' : ''}<b>ملف برنامج (.json)</b> أرسله لك أحد زملائك. ستراجع النتائج وتعدّلها قبل إضافتها، ولن يُضاف شيء قبل موافقتك.</p>
+    <p class="lead">${ai ? 'صورة أو PDF أو ملف برنامج (.json) من زميل.' : 'ملف برنامج (.json) من زميل.'} تراجع النتائج وتعدّلها قبل الإضافة، ولا يُضاف شيء قبل موافقتك.</p>
     <input type="file" id="impFile" hidden accept="${ai ? '.json,application/json,image/*,application/pdf' : '.json,application/json'}">
-    <div class="row"><button class="btn primary" data-act="pickfile" ${ui.importBusy ? 'disabled' : ''}>${ICONS.upload}اختيار ملف</button>
-      ${ui.importBusy ? '<span class="row" role="status"><span class="spin"></span> جارٍ تحليل البرنامج…</span>' : ''}</div>
-    ${ai ? '<p class="note" style="margin-bottom:0">تحليل الصور والـ PDF يحتاج إنترنت. الذكاء الاصطناعي يقرأ المواعيد فقط ولا يحسب أي علامة.</p>'
-      : '<p class="note" style="margin-bottom:0">قراءة الصور والـ PDF بالذكاء الاصطناعي غير مفعّلة لحسابك. يمكنك استيراد ملف برنامج من زميل أو إضافة المذاكرات يدوياً.</p>'}
+    <div class="row"><button class="btn primary" data-act="pickfile" ${ui.imp.state === 'busy' ? 'disabled' : ''}>${ICONS.upload}اختيار ملف</button>
+      <button class="btn" data-act="add">${ICONS.plus}إضافة يدوية</button></div>
+    ${importStatus()}
+    ${ai ? `<details class="adv" data-adv ${advOpen ? 'open' : ''}><summary>خيارات متقدمة</summary>${modelPicker()}</details>` : ''}
+    <p class="note" style="margin:12px 0 0">${ai ? 'الصور وملفات PDF تحتاج إنترنت. الذكاء الاصطناعي يقرأ المواعيد فقط ولا يحسب أي علامة.'
+      : 'قراءة الصور وملفات PDF بالذكاء الاصطناعي غير مفعّلة لحسابك. استورد ملف برنامج من زميل أو أضف المذاكرات يدوياً.'}</p>
   </section>
-  <section class="card"><div class="row" style="justify-content:space-between"><span>أضف مذاكرة واحدة يدوياً</span><button class="btn" data-act="add">${ICONS.plus}إضافة</button></div></section>
-  <div class="sec-title">مشاركة برنامجك مع زملائك</div>
+  <div class="sec-title"><span>مشاركة برنامجك</span></div>
   <section class="card">
-    <p class="note" style="margin-top:0">يصدّر ملفاً فيه التواريخ والمواد والعناوين فقط، <b>بدون علاماتك أو أهدافك</b>، ليستورده زملاؤك بدل كتابته.</p>
+    <p class="note" style="margin-top:0">ملف فيه التواريخ والمواد والعناوين فقط، <b>بلا علاماتك أو أهدافك</b>، ليستورده زملاؤك.</p>
     <div class="row"><select id="shareScope" style="max-width:240px" aria-label="نطاق التصدير"><option value="month">${monthLabel(ui.month)}</option><option value="all">كل الأشهر</option></select>
       <button class="btn" data-act="shareschedule">${ICONS.download}تصدير ملف البرنامج</button></div>
   </section>`;
 }
 
+/* ---------- الإعدادات: قائمة أسماء، وكل اسم يفتح صفحته ---------- */
+function settingsPages() {
+  const list = [
+    ['account', 'الحساب والمزامنة', 'الاسم والبريد وحالة الحفظ'],
+    ['display', 'العرض والهدف', 'مقياس المعدل وهدف كل شهر'],
+    ['subjects', 'المواد والعلامات الكاملة', 'موادك وعلامة كل منها'],
+  ];
+  if (window.__mzNative) list.push(['notifications', 'التنبيهات', 'تذكيرات المذاكرات على هاتفك']);
+  list.push(['backup', 'النسخ الاحتياطي', 'تصدير نسخة من بياناتك واستيرادها']);
+  if (store.profile().ai_enabled) list.push(['ai', 'الذكاء الاصطناعي', 'قراءة البرنامج من صورة أو PDF']);
+  list.push(['about', 'حول التطبيق', 'الإصدار وشرح البنية']);
+  return list;
+}
+
+const SETTINGS_BODY = {
+  account() {
+    const p = store.profile();
+    const user = auth.user;
+    const s = sync.getStatus();
+    const name = p.display_name || user?.user_metadata?.display_name || '';
+    const syncText = {
+      synced: `محفوظ سحابياً${s.lastSyncAt ? ` · آخر مزامنة ${new Date(s.lastSyncAt).toLocaleTimeString('ar', { hour: '2-digit', minute: '2-digit' })}` : ''}`,
+      syncing: 'جارٍ المزامنة…',
+      pending: `${s.pending} تعديل بانتظار المزامنة`,
+      offline: `غير متصل. تعديلاتك محفوظة على جهازك${s.pending ? ` (${s.pending} بانتظار الإرسال)` : ''} وستُرسل عند عودة الاتصال.`,
+      failed: `فشل الحفظ${s.lastError ? `: ${esc(s.lastError)}` : ''}${s.failed ? ` (${s.failed} عنصر رُفض)` : ''}`,
+      idle: '',
+    }[s.state];
+    return `<section class="card">
+      ${name ? `<div class="kv"><span>الاسم</span><span>${esc(name)}</span></div>` : ''}
+      <div class="kv"><span>البريد</span><span dir="ltr">${esc(user?.email || '')}</span></div>
+      <div class="kv"><span>الحالة</span><span>${syncText}</span></div>
+      <div class="row" style="margin-top:10px"><button class="btn" data-act="sync">${ICONS.sync}مزامنة الآن</button><button class="btn danger" data-act="signout">تسجيل الخروج</button></div>
+    </section>`;
+  },
+  display() {
+    const st = store.settings();
+    const scales = [100, 200, 300];
+    const key = ui.month;
+    const custom = store.hasCustomGoal(key);
+    const th = lsGet('mz_theme') || 'auto';
+    return `<section class="card">
+      <div class="lbl">مظهر التطبيق</div>
+      <div class="chips" style="margin:8px 0">${[['auto', 'تلقائي'], ['dark', 'داكن'], ['light', 'فاتح']].map(([v, l]) => `<button class="chipbtn" data-act="settheme" data-v="${v}" aria-pressed="${th === v}">${l}</button>`).join('')}</div>
+    </section>
+    <section class="card">
+      <div class="lbl">مقياس عرض المعدل (يغيّر العرض فقط، ولا يمس العلامات أو الحسابات)</div>
+      <div class="chips" style="margin:8px 0">${scales.map((v) => `<button class="chipbtn" data-act="setscale" data-v="${v}" aria-pressed="${st.display_scale === v}">${v}</button>`).join('')}</div>
+      <form class="row" data-form="scale" novalidate><label class="lbl" for="scaleIn">مقياس آخر</label>
+        <input id="scaleIn" class="w-sm" type="text" inputmode="decimal" value="${scales.includes(st.display_scale) ? '' : fmt(st.display_scale)}" placeholder="مثلاً 3100"><button class="btn small">تطبيق</button></form>
+    </section>
+    <section class="card">
+      <div class="lbl" style="margin-bottom:6px">الأهداف (تُعدَّل من هنا فقط، وتظهر في الرئيسية للعرض)</div>
+      ${monthbar(key)}
+      <form class="goalbox" data-form="goal" novalidate>
+        <label for="goalIn">هدف ${monthLabel(key)}</label>
+        <div class="row"><input id="goalIn" class="w-sm" type="text" inputmode="decimal" value="${fmt(store.monthGoal(key))}" aria-describedby="goalErr"><span class="num">%</span>
+          <button class="btn small">حفظ</button>
+          ${custom ? `<button type="button" class="link" data-act="resetgoal">استعادة الافتراضي (${fmt(st.default_goal)}%)</button>` : ''}</div>
+        <div class="err" id="goalErr"></div>
+      </form>
+      <hr style="border:0;border-top:1px solid var(--line);margin:14px 0">
+      <form class="row" data-form="defgoal" novalidate><label class="lbl" for="defGoal">الهدف الافتراضي لكل الأشهر (%)</label>
+        <input id="defGoal" class="w-sm" type="text" inputmode="decimal" value="${fmt(st.default_goal)}"><button class="btn small">حفظ</button></form>
+    </section>`;
+  },
+  subjects() {
+    const subs = store.subjects();
+    return `<section class="card">
+      ${subs.length ? subs.map((sj) => `<div class="subj-row">
+        <input type="text" value="${esc(sj.name)}" maxlength="80" data-sf="name" data-sid="${sj.id}" aria-label="اسم المادة">
+        <input type="text" inputmode="decimal" value="${fmt(sj.default_full_mark)}" data-sf="mark" data-sid="${sj.id}" aria-label="العلامة الكاملة لمادة ${esc(sj.name)}">
+        <button class="btn danger small" data-act="delsubj" data-sid="${sj.id}" aria-label="حذف مادة ${esc(sj.name)}">${ICONS.trash}</button></div>`).join('')
+        : '<p class="note" style="margin-top:0">لم تُضف مواداً بعد. أضف موادك مع علامة كل منها الكاملة، وسيملأها التطبيق تلقائياً عند اعتماد البرنامج.</p>'}
+      <form class="subj-row" data-form="addsubj" novalidate style="border-top:1px solid var(--line);margin-top:6px;padding-top:12px">
+        <input type="text" name="name" placeholder="اسم المادة" maxlength="80" aria-label="اسم مادة جديدة">
+        <input type="text" name="mark" inputmode="decimal" placeholder="العلامة" aria-label="العلامة الكاملة">
+        <button class="btn small primary">${ICONS.plus}إضافة</button></form>
+      <p class="note" style="margin-bottom:0">تغيير علامة مادة لا يغيّر مذاكراتها الموجودة؛ يمكنك تعديل علامة كل مذاكرة على حدة.</p>
+    </section>`;
+  },
+  notifications() { return '<div id="mzSlot"></div>'; },
+  backup() {
+    return `<section class="card">
+      <p class="note" style="margin-top:0">بياناتك محفوظة سحابياً، وهذه نسخة إضافية على جهازك.</p>
+      <input type="file" id="bkFile" hidden accept=".json,application/json">
+      <div class="row"><button class="btn" data-act="exportbackup">${ICONS.download}تصدير نسخة احتياطية</button><button class="btn" data-act="importbackup">${ICONS.upload}استيراد نسخة</button></div>
+    </section>`;
+  },
+  ai() {
+    return `<section class="card">
+      <div class="kv"><span>قراءة برامج المذاكرات</span><span><b style="color:var(--done)">مفعّلة لحسابك</b></span></div>
+      ${modelPicker()}
+      <p class="note" style="margin-bottom:0">يُستخدم الذكاء الاصطناعي لقراءة صور وملفات برنامج المذاكرات فقط. مفتاح الخدمة محفوظ في خادم Supabase ولا يصل إلى متصفحك أبداً، ولا تُرسل علاماتك إلى أي جهة.</p>
+    </section>`;
+  },
+  about() {
+    return `<section class="card"><div class="kv"><span>الإصدار</span><span class="num">${APP_VERSION}</span></div>
+      ${window.__mzNative ? '<div id="mzUpd"></div>' : ''}
+      <p style="margin-bottom:0"><a class="link" href="architecture.html">شرح البنية المعمارية للتطبيق ←</a></p></section>`;
+  },
+};
+
 function viewSettings() {
-  const st = store.settings();
-  const p = store.profile();
-  const user = auth.user;
-  const s = sync.getStatus();
-  const subs = store.subjects();
-  const name = p.display_name || user?.user_metadata?.display_name || '';
-  const scales = [100, 200, 300];
-  const syncText = {
-    synced: `محفوظ سحابياً${s.lastSyncAt ? ` · آخر مزامنة ${new Date(s.lastSyncAt).toLocaleTimeString('ar', { hour: '2-digit', minute: '2-digit' })}` : ''}`,
-    syncing: 'جارٍ المزامنة…',
-    pending: `${s.pending} تعديل بانتظار المزامنة`,
-    offline: `غير متصل. تعديلاتك محفوظة على جهازك${s.pending ? ` (${s.pending} بانتظار الإرسال)` : ''} وستُرسل عند عودة الاتصال.`,
-    failed: `فشل الحفظ${s.lastError ? `: ${esc(s.lastError)}` : ''}${s.failed ? ` (${s.failed} عنصر رُفض)` : ''}`,
-    idle: '',
-  }[s.state];
-
-  return `<h2 style="margin-bottom:6px">الإعدادات</h2>
-  <div class="sec-title">الحساب والمزامنة</div>
-  <section class="card">
-    ${name ? `<div class="kv"><span>الاسم</span><span>${esc(name)}</span></div>` : ''}
-    <div class="kv"><span>البريد</span><span dir="ltr">${esc(user?.email || '')}</span></div>
-    <div class="kv"><span>الحالة</span><span>${syncText}</span></div>
-    <div class="row" style="margin-top:10px"><button class="btn" data-act="sync">${ICONS.sync}مزامنة الآن</button><button class="btn danger" data-act="signout">تسجيل الخروج</button></div>
-  </section>
-
-  <div class="sec-title">العرض والأهداف</div>
-  <section class="card">
-    <div class="lbl">مقياس عرض المعدل (يغيّر العرض فقط، ولا يمس العلامات أو الحسابات)</div>
-    <div class="chips" style="margin:8px 0">${scales.map((v) => `<button class="chipbtn" data-act="setscale" data-v="${v}" aria-pressed="${st.display_scale === v}">${v}</button>`).join('')}</div>
-    <form class="row" data-form="scale" novalidate><label class="lbl" for="scaleIn">مقياس آخر</label>
-      <input id="scaleIn" class="w-sm" type="text" inputmode="decimal" value="${scales.includes(st.display_scale) ? '' : fmt(st.display_scale)}" placeholder="مثلاً 3100"><button class="btn small">تطبيق</button></form>
-    <hr style="border:0;border-top:1px solid var(--line);margin:14px 0">
-    <form class="row" data-form="defgoal" novalidate><label class="lbl" for="defGoal">الهدف الافتراضي للأشهر (%)</label>
-      <input id="defGoal" class="w-sm" type="text" inputmode="decimal" value="${fmt(st.default_goal)}"><button class="btn small">حفظ</button></form>
-  </section>
-
-  <div class="sec-title">المواد والعلامات الكاملة الافتراضية</div>
-  <section class="card">
-    ${subs.length ? subs.map((sj) => `<div class="subj-row">
-      <input type="text" value="${esc(sj.name)}" maxlength="80" data-sf="name" data-sid="${sj.id}" aria-label="اسم المادة">
-      <input type="text" inputmode="decimal" value="${fmt(sj.default_full_mark)}" data-sf="mark" data-sid="${sj.id}" aria-label="العلامة الكاملة لمادة ${esc(sj.name)}">
-      <button class="btn danger small" data-act="delsubj" data-sid="${sj.id}" aria-label="حذف مادة ${esc(sj.name)}">${ICONS.trash}</button></div>`).join('')
-      : '<p class="note" style="margin-top:0">لم تُضف مواداً بعد. أضف موادك مع علامة كل منها الكاملة، وسيملأها التطبيق تلقائياً عند اعتماد البرنامج.</p>'}
-    <form class="subj-row" data-form="addsubj" novalidate style="border-top:1px solid var(--line);margin-top:6px;padding-top:12px">
-      <input type="text" name="name" placeholder="اسم المادة" maxlength="80" aria-label="اسم مادة جديدة">
-      <input type="text" name="mark" inputmode="decimal" placeholder="العلامة" aria-label="العلامة الكاملة">
-      <button class="btn small primary">${ICONS.plus}إضافة</button></form>
-    <p class="note" style="margin-bottom:0">تغيير علامة مادة لا يغيّر مذاكراتها الموجودة؛ يمكنك تعديل علامة كل مذاكرة على حدة.</p>
-  </section>
-
-  <div class="sec-title">النسخ الاحتياطي</div>
-  <section class="card">
-    <p class="note" style="margin-top:0">بياناتك محفوظة سحابياً، وهذه نسخة إضافية على جهازك.</p>
-    <input type="file" id="bkFile" hidden accept=".json,application/json">
-    <div class="row"><button class="btn" data-act="exportbackup">${ICONS.download}تصدير نسخة احتياطية</button><button class="btn" data-act="importbackup">${ICONS.upload}استيراد نسخة</button></div>
-  </section>
-
-  <div class="sec-title">الذكاء الاصطناعي</div>
-  <section class="card">
-    <div class="kv"><span>قراءة برامج المذاكرات</span><span>${p.ai_enabled ? '<b style="color:var(--done)">مفعّلة لحسابك</b>' : 'غير مفعّلة لحسابك'}</span></div>
-    <p class="note" style="margin-bottom:0">يُستخدم الذكاء الاصطناعي لقراءة صور وملفات برنامج المذاكرات فقط. مفتاح الخدمة محفوظ في خادم Supabase ولا يصل إلى متصفحك أبداً، ولا تُرسل علاماتك إلى أي جهة.</p>
-  </section>
-
-  <div class="sec-title">حول التطبيق</div>
-  <section class="card"><div class="kv"><span>الإصدار</span><span class="num">${APP_VERSION}</span></div>
-    <p style="margin-bottom:0"><a class="link" href="architecture.html">شرح البنية المعمارية للتطبيق ←</a></p></section>`;
+  const pages = settingsPages();
+  const cur = pages.find((x) => x[0] === ui.sub);
+  if (!cur) {
+    return `<h2 class="ptitle">الإعدادات</h2>
+    <nav class="slist" aria-label="أقسام الإعدادات">${pages.map(([id, t, h]) => `<button class="srow" data-act="go" data-r="settings/${id}"><span><b>${t}</b><small>${h}</small></span>${ICONS.next}</button>`).join('')}</nav>`;
+  }
+  return `<div class="subhead"><button class="iconbtn" data-act="go" data-r="settings" aria-label="رجوع إلى الإعدادات">${ICONS.prev}</button><h2>${cur[1]}</h2></div>${SETTINGS_BODY[cur[0]]()}`;
 }
 
 /* ====================== مراجعة الاستيراد ====================== */
@@ -659,33 +722,138 @@ async function filePayload(file) {
   return { mimeType: 'image/jpeg', data: await toBase64(blob) };
 }
 
+
+/* ====================== حالة الرفع واختيار النموذج ====================== */
+const AI_MODELS = [
+  ['gemini-2.5-flash', 'Gemini 2.5 Flash — سريع (الافتراضي)'],
+  ['gemini-2.5-flash-lite', 'Gemini 2.5 Flash-Lite — الأخف والأسرع'],
+  ['gemini-2.5-pro', 'Gemini 2.5 Pro — الأدق وحدّه أقل'],
+];
+const MODEL_RE = /^gemini-[a-z0-9][a-z0-9.\-]{0,58}$/;
+const getModel = () => { const m = lsGet('mz:aiModel'); return m && MODEL_RE.test(m) ? m : AI_MODELS[0][0]; };
+
+function modelPicker() {
+  const cur = getModel();
+  const preset = AI_MODELS.some(([v]) => v === cur);
+  return `<div class="field" style="margin:14px 0 0">
+    <label for="aiModel">نموذج الذكاء الاصطناعي</label>
+    <select id="aiModel">${AI_MODELS.map(([v, l]) => `<option value="${v}" ${v === cur ? 'selected' : ''}>${l}</option>`).join('')}
+      <option value="__custom" ${preset ? '' : 'selected'}>نموذج آخر (اكتب اسمه)…</option></select>
+    <input id="aiModelCustom" type="text" dir="ltr" autocapitalize="off" spellcheck="false" placeholder="gemini-…" maxlength="60" value="${preset ? '' : esc(cur)}" ${preset ? 'hidden' : ''} style="margin-top:8px">
+    <div class="err" id="aiModelErr"></div>
+    <p class="note" style="margin:6px 0 0">يُحفظ الاختيار على هذا الجهاز. إن ظهر خطأ «النموذج غير موجود» أو «حدّ الاستخدام» جرّب نموذجاً آخر.</p>
+  </div>`;
+}
+
+const fmtSize = (b) => (b >= 1048576 ? `${(b / 1048576).toFixed(1)} MB` : `${Math.max(1, Math.round(b / 1024))} KB`);
+const IMP_STEPS = ['تجهيز الملف وضغطه', 'إرسال الملف وقراءته بالذكاء الاصطناعي (قد يستغرق حتى دقيقة)', 'تجهيز النتائج للمراجعة'];
+const IMP_HINTS = {
+  ai_model_not_found: 'اختر نموذجاً آخر من القائمة أدناه ثم أعد المحاولة.',
+  ai_key_invalid: 'تأكد أن المفتاح GEMINI_API_KEY مضبوط في Supabase ← Edge Functions ← Secrets وأنه صالح.',
+  ai_not_configured: 'أضف المفتاح GEMINI_API_KEY في Supabase ← Edge Functions ← Secrets.',
+  ai_rate_limited: 'الخطة المجانية لها حدّ في الدقيقة وفي اليوم. انتظر دقيقة أو بدّل النموذج.',
+  ai_overloaded: 'الخدمة مشغولة. أعد المحاولة بعد قليل أو بدّل النموذج.',
+  ai_bad_request: 'جرّب صورة أوضح أو نموذجاً آخر.',
+  ai_provider_error: 'جرّب صورة أوضح أو نموذجاً آخر.',
+  ai_bad_output: 'جرّب صورة أوضح أو نموذجاً آخر.',
+  ai_not_enabled: 'هذه الميزة مفعّلة لحساب المسؤول فقط. استورد ملف برنامج (.json) من زميل.',
+  network: 'تحقق من اتصالك بالإنترنت ثم أعد المحاولة.',
+  timeout: 'جرّب صورة أصغر وأوضح، أو نموذج Flash-Lite الأسرع.',
+  file_missing_or_too_large: 'صغّر الملف (الحدّ نحو 5 ميغابايت للـ PDF).',
+  unsupported_file_type: 'استخدم صورة (PNG/JPG/WEBP) أو PDF أو ملف برنامج (.json).',
+  no_exams: 'جرّب صورة أوضح تُظهر الجدول كاملاً، أو أضف المذاكرات يدوياً.',
+  bad_json: 'اختر ملف برنامج صدّره زميلك من تطبيق مذاكراتي.',
+};
+
+function importStatus() {
+  const s = ui.imp;
+  if (s.state === 'busy') {
+    const el = Math.max(0, Math.round((Date.now() - s.t0) / 1000));
+    return `<div class="statuspanel busy" role="status" aria-live="polite">
+      <div class="row"><span class="spin"></span><b>جارٍ تحليل البرنامج…</b></div>
+      <div class="note" style="margin:6px 0">${esc(s.fileName)} · ${fmtSize(s.size)} · النموذج: <span class="mono">${esc(s.model)}</span></div>
+      <ol class="steps">${IMP_STEPS.map((t, i) => `<li class="${i < s.step ? 'done' : i === s.step ? 'now' : ''}">${t}</li>`).join('')}</ol>
+      <div class="row" style="justify-content:space-between"><span class="note">الوقت المنقضي: <b class="num" id="impElapsed">${el}</b> ث</span>
+        <button class="btn" data-act="impcancel">إلغاء</button></div></div>`;
+  }
+  if (s.state === 'error') {
+    const e = s.err;
+    const tech = [e.code && `code: ${e.code}`, e.status && `status: ${e.status}`, e.model && `model: ${e.model}`, e.detail && `detail: ${e.detail}`].filter(Boolean).join('\n');
+    return `<div class="statuspanel err" role="alert">
+      <b>⚠ ${esc(e.title)}</b>
+      ${e.hint ? `<p style="margin:6px 0">${esc(e.hint)}</p>` : ''}
+      ${tech ? `<details><summary>التفاصيل التقنية</summary><pre class="mono" dir="ltr">${esc(tech)}</pre></details>` : ''}
+      <div class="row" style="margin-top:8px">${s.file ? '<button class="btn primary" data-act="imptry">إعادة المحاولة</button>' : ''}
+        <button class="btn" data-act="impdismiss">إغلاق</button></div></div>`;
+  }
+  return '';
+}
+
+function setImportError(e, extra = {}) {
+  const code = e?.code || (e?.network ? 'network' : extra.code || '');
+  ui.imp = {
+    ...ui.imp,
+    state: 'error',
+    err: {
+      title: extra.title || arMessage(e),
+      hint: IMP_HINTS[code] || '',
+      code,
+      status: e?.status || 0,
+      model: ui.imp.model || '',
+      detail: e?.message && e.message !== 'network' && e.message !== code ? String(e.message).slice(0, 300) : '',
+    },
+  };
+  render(true);
+}
+
+let impTimer = null;
+const stopImpTimer = () => { clearInterval(impTimer); impTimer = null; };
+
 async function handleImportFile(file) {
   if (!file) return;
+  const myId = ui.imp.id + 1;
+  ui.imp = { state: 'idle', id: myId, file, fileName: file.name, size: file.size };
   if (file.type === 'application/json' || /\.json$/i.test(file.name)) {
     let obj;
-    try { obj = JSON.parse(await file.text()); } catch { toast('الملف ليس JSON صالحاً', 'err'); return; }
+    try { obj = JSON.parse(await file.text()); } catch { setImportError(null, { title: 'الملف ليس JSON صالحاً', code: 'bad_json' }); return; }
     const v = validateScheduleFile(obj);
-    if (!v.ok) { toast(v.error, 'err'); return; }
+    if (!v.ok) { setImportError(null, { title: v.error, code: 'bad_json' }); return; }
+    ui.imp = { state: 'idle', id: myId };
     openReview(v.rows, 'file', v.skipped);
     return;
   }
-  if (!store.profile().ai_enabled) { toast('قراءة الصور والـ PDF غير مفعّلة لحسابك. استورد ملف برنامج (.json) من زميل أو أضف المذاكرات يدوياً.', 'err'); return; }
-  if (!navigator.onLine) { toast('تحليل البرنامج بالذكاء الاصطناعي يحتاج اتصالاً بالإنترنت', 'err'); return; }
-  ui.importBusy = true;
+  if (!store.profile().ai_enabled) { setImportError(null, { title: 'قراءة الصور والـ PDF غير مفعّلة لحسابك', code: 'ai_not_enabled' }); return; }
+  if (!navigator.onLine) { setImportError({ network: true }, { title: 'تحليل البرنامج بالذكاء الاصطناعي يحتاج اتصالاً بالإنترنت' }); return; }
+
+  const model = getModel();
+  ui.imp = { state: 'busy', id: myId, file, fileName: file.name, size: file.size, model, step: 0, t0: Date.now() };
   render(true);
+  stopImpTimer();
+  impTimer = setInterval(() => { const n = $('#impElapsed'); if (n) n.textContent = Math.round((Date.now() - ui.imp.t0) / 1000); }, 1000);
+  const alive = () => ui.imp.id === myId && ui.imp.state === 'busy';
   try {
     const payload = await filePayload(file);
-    const r = await functions.invoke('parse-schedule', { ...payload, referenceYear: Number(ui.month.slice(0, 4)) });
+    if (!alive()) return;
+    ui.imp.step = 1; render(true);
+    const timeout = new Promise((_, rej) => setTimeout(() => rej(codeErr('timeout')), 100000));
+    const r = await Promise.race([functions.invoke('parse-schedule', { ...payload, model, referenceYear: Number(ui.month.slice(0, 4)) }), timeout]);
+    if (!alive()) return;
+    ui.imp.step = 2; render(true);
     const list = Array.isArray(r?.exams) ? r.exams : [];
-    if (!list.length) toast('لم يجد الذكاء الاصطناعي مذاكرات في الملف. جرّب صورة أوضح أو أضفها يدوياً', 'err');
-    else openReview(list, 'ai');
+    if (!list.length) { setImportError(null, { title: 'لم يجد الذكاء الاصطناعي مذاكرات في الملف', code: 'no_exams' }); return; }
+    ui.imp = { state: 'idle', id: myId };
+    openReview(list, 'ai');
   } catch (e) {
-    toast(arMessage(e), 'err');
+    if (alive()) setImportError(e);
   } finally {
-    ui.importBusy = false;
-    render(true);
+    if (ui.imp.id === myId && ui.imp.state !== 'busy') stopImpTimer();
+    if (ui.imp.id === myId && ui.imp.state === 'busy') { ui.imp = { state: 'idle', id: myId }; stopImpTimer(); render(true); }
   }
 }
+
+A.impcancel = () => { ui.imp = { state: 'idle', id: ui.imp.id + 1 }; stopImpTimer(); render(true); toast('أُلغي التحليل'); };
+A.impdismiss = () => { ui.imp = { state: 'idle', id: ui.imp.id }; render(true); };
+A.imptry = () => { const f = ui.imp.file; if (f) handleImportFile(f); };
 
 A.pickfile = () => $('#impFile')?.click();
 A.shareschedule = async () => {
@@ -838,6 +1006,13 @@ F.quick = (form) => {
   render(true);
 };
 
+A.settheme = (t) => {
+  const v = t.dataset.v; lsSet('mz_theme', v);
+  const eff = v === 'auto' ? (matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark') : v;
+  document.documentElement.setAttribute('data-theme', eff);
+  const m = document.querySelector('meta[name=theme-color]'); if (m) m.content = eff === 'light' ? '#f3fbf0' : '#070b07';
+  render(true);
+};
 A.setscale = (t) => { store.setSettings({ display_scale: Number(t.dataset.v) }); render(true); };
 F.scale = () => {
   const v = parseNum($('#scaleIn').value);
@@ -961,6 +1136,20 @@ document.addEventListener('change', (e) => {
     const fullEl = $('#ex-full');
     const sub = store.subjects().find((s) => s.id === t.value);
     if (sub && !fullEl.dataset.touched && !document.querySelector('#dlg form').dataset.id) fullEl.value = fmt(sub.default_full_mark);
+    return;
+  }
+  if (t.id === 'aiModel') {
+    const custom = $('#aiModelCustom');
+    if (t.value === '__custom') { custom.hidden = false; custom.focus(); return; }
+    custom.hidden = true; $('#aiModelErr').textContent = '';
+    lsSet('mz:aiModel', t.value); toast('تم اختيار النموذج');
+    return;
+  }
+  if (t.id === 'aiModelCustom') {
+    const v = t.value.trim().toLowerCase();
+    if (!MODEL_RE.test(v)) { $('#aiModelErr').textContent = 'اكتب اسم نموذج صحيحاً يبدأ بـ gemini- مثل gemini-2.5-flash'; return; }
+    $('#aiModelErr').textContent = ''; t.value = v;
+    lsSet('mz:aiModel', v); toast('تم اختيار النموذج');
     return;
   }
   if (t.id === 'impFile') { const f = t.files[0]; t.value = ''; handleImportFile(f); return; }
